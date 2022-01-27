@@ -1,0 +1,15 @@
+---
+
+  general:
+    debug: false
+    import_folder: test_import
+
+  grafana:
+    default:
+      protocol: http
+      host: localhost
+      port: 3000
+      token: "____APIKEY____"
+      search_api_limit: 5000
+      verify_ssl: true
+

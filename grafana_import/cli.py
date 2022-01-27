@@ -16,7 +16,7 @@ Suivi des modifications :
 #***********************************************************************************************
 
 
-from grafana_import.constants import (PKG_NAME, PKG_VERSION, JSON_CONFIG_NAME)
+from grafana_import.constants import (PKG_NAME, PKG_VERSION, CONFIG_NAME)
 
 import argparse, json, sys, os, re, socket, logging
 import unicodedata, traceback
@@ -26,7 +26,7 @@ from datetime import datetime
 from grafana_api.grafana_face import GrafanaFace
 import grafana_api.grafana_api as GrafanaApi
 
-from grafana_import.jsonConfig import jsonConfig
+import yaml
 
 #******************************************************************************************
 config = None
@@ -36,9 +36,9 @@ def get_dashboard_content(config, args, grafana_api, dashboard_name):
 
    try:
       res = grafana_api.search.search_dashboards(
-	type_='dash-db'
-	, limit=config['grafana']['search_api_limit']
-	)
+	      type_='dash-db',
+         limit=config['grafana']['search_api_limit'],
+      )
    except Exception as e:
       print("error: {}".format(traceback.format_exc()) )
 #      print("error: {} - message: {}".format(e.__doc__, e.message) )
@@ -127,7 +127,7 @@ def save_dashboard(config, args, base_path, dashboard_name, params, action):
 class myArgs:
   attrs = [ 'pattern'
                 , 'base_path', 'config_file'
-                , 'dashboard_name'
+                , 'grafana', 'dashboard_name'
                 , 'pretty', 'overwrite', 'verbose'
                 ]
   def __init__(self):
@@ -158,6 +158,10 @@ def main():
    parser.add_argument('-d', '--dashboard_name'
 			, help='name of dashboard to export.')
 
+   parser.add_argument('-g', '--grafana_label'
+			, help='label in the config file that represent the grafana to connect to.'
+         , default='default')
+
    parser.add_argument('-f', '--grafana_folder'
 			, help='the folder name where to import into Grafana.')
 
@@ -172,7 +176,7 @@ def main():
 			, action='store_true'
 			, help='use JSON indentation when exporting or extraction of dashboards.')
 
-   parser.add_argument('-v ', '--verbose'
+   parser.add_argument('-v', '--verbose'
 			, action='store_true'
 			, help='verbose mode; display log message to stdout.')
 
@@ -193,18 +197,26 @@ def main():
    if args.base_path is not None:
       base_path = inArgs.base_path
 
-   config_file = base_path + '/' + JSON_CONFIG_NAME
+   config_file = os.path.join(base_path, CONFIG_NAME)
    if args.config_file is not None:
-      config_file = inArgs.config_file
+      if not re.search(r'^(\.|\/)?/', config_file):
+         config_file = os.path.join(base_path,args.config_file)
+      else:
+         config_file = args.config_file
 
-   confObj = jsonConfig(config_file)
-   if confObj is None:
-       print( 'init config failure !')
-       sys.exit(2)
-   config = confObj.load()
+   config = None
+   try:
+      with open(config_file, 'r') as cfg_fh:
+         try:
+            config = yaml.safe_load(cfg_fh)
+         except yaml.scanner.ScannerError as exc:
+            mark = exc.problem_mark
+            print("Yaml file parsing unsuccessul : %s - line: %s column: %s => %s" % (config_file, mark.line+1, mark.column+1, exc.problem) )
+   except Exception as exp:
+      print('ERROR: config file not read: %s' % str(exp))
+
    if config is None:
-       print( confObj.err_msg )
-       sys.exit(2)
+      sys.exit(1)
 
    if args.verbose is None:
       if 'debug' in config['general']:
@@ -220,7 +232,7 @@ def main():
 
    if args.action == 'exporter' and ( not 'dashboard_name' in config['general'] or config['general']['dashboard_name'] is None) :
       print("ERROR: no dashboard has been specified.")
-      sys.exit(2)
+      sys.exit(1)
 
 #************
    config['check_folder'] = False
@@ -232,29 +244,33 @@ def main():
    if 'export_suffix' not in config['general'] or config['general']['export_suffix'] is None:
       config['general']['export_suffix'] = "_%Y%m%d%H%M%S"
 
+   if not args.grafana_label in config['grafana']:
+      print("ERROR: invalid grafana config label has been specified (-g {0}).".format(args.grafana_label))
+      sys.exit(1)
+      
 #************
    grafana_api = GrafanaFace(
-	auth=config['grafana']['token']
-	, host=config['grafana']['host']
-	, protocol=config['grafana']['protocol']
-	, port=config['grafana']['port']
-	, verify=config['grafana']['verify_ssl']
+      auth=config['grafana'][args.grafana_label]['token'],
+      host=config['grafana'][args.grafana_label]['host'],
+      protocol=config['grafana'][args.grafana_label]['protocol'],
+      port=config['grafana'][args.grafana_label]['port'],
+      verify=config['grafana'][args.grafana_label]['verify_ssl'],
    )
    try:
       res = grafana_api.health.check()
       if res['database'] != 'ok':
          print("grafana health_check is not KO.")
-         sys.exit(2)
+         sys.exit(1)
       elif args.verbose:
          print("grafana health_check is OK.")
-   except e:
-      print("error: {} - message: {}".format(status_code, e.message) )
-      sys.exit(2)
+   except Exception as e:
+      print("ERROR: {} - message: {}".format(res, e.message) )
+      sys.exit(1)
 
    if args.action == 'import':
       if args.dashboard_file is None:
-         print('no file to import provided!')
-         sys.exit(2)
+         print('ERROR: no file to import provided!')
+         sys.exit(1)
       import_path = ''
       import_file = args.dashboard_file
       if not re.search(r'^(?:(?:/)|(?:\.?\./))', import_file):
@@ -265,8 +281,8 @@ def main():
       try:
          input = open(import_path, 'r')
       except OSError as e:
-         print('File {0} error: {1}.'.format(import_path, e.strerror))
-         sys.exit(2)
+         print('ERROR: File {0} error: {1}.'.format(import_path, e.strerror))
+         sys.exit(1)
 
       data = input.read()
       input.close()
@@ -274,8 +290,8 @@ def main():
       try:
          dash = json.loads(data)
       except json.JSONDecodeError as e:
-         print("error reading '{0}': {1}".format(import_path, e))
-         sys.exit(2)
+         print("ERROR: reading '{0}': {1}".format(import_path, e))
+         sys.exit(1)
 
       #** check dashboard existence
       #** dash from file has no meta data (folder infos)
@@ -344,10 +360,10 @@ def main():
             sys.exit(0)
          else:
             print("KO: dashboard {0} not imported into '{1}'.".format(dash['title'], config['general']['grafana_folder']))
-            sys.exit(2)
+            sys.exit(1)
       else:
          print("error invalid dashboard file '{0}': can't find dashboard uid".format(import_path))
-         sys.exit(2)
+         sys.exit(1)
    else:   # export
      dash = get_dashboard_content(config, args, grafana_api, config['general']['dashboard_name'])
      if dash is not None:
