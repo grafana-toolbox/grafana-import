@@ -1,10 +1,11 @@
 # Grafana import Tool
 
-A python3 bases application to play with grafana dashboards using [Grafana API](https://grafana.com/docs/grafana/latest/http_api/) and a python interface [grafana_api](https://github.com/m0nhawk/grafana_api)
+A python3 based application to play with grafana dashboards using [Grafana API](https://grafana.com/docs/grafana/latest/http_api/) and a python interface [grafana_api](https://github.com/m0nhawk/grafana_api)
 
 The aim of this tool is to:
-1. Export easilly an existing Grafana dashboard.
-3. Import a dashboard in JSON format into a Grafana.
+1. Export easilly an existing Grafana dashboard from a folder.
+2. Import a dashboard in JSON format into a Grafana.
+3. Remove a dashboard
 
 ## Install using this repo
 
@@ -87,21 +88,30 @@ then enter into your directory and type in you commands.
 
 **usage**: 
 ```shell
-usage: grafana-import [-h] [-b BASE_PATH] [-c CONFIG_FILE] [-d DASHBOARD_NAME]
-                      [-g GRAFANA_LABEL] [-f GRAFANA_FOLDER]
-                      [-i DASHBOARD_FILE] [-o] [-p] [-v] [-V]
+usage: grafana-import [-h] [-a] [-b BASE_PATH] [-c CONFIG_FILE]
+                      [-d DASHBOARD_NAME] [-g GRAFANA_LABEL]
+                      [-f GRAFANA_FOLDER] [-i DASHBOARD_FILE] [-o] [-p] [-v]
+                      [-V]
                       [ACTION]
 
 play with grafana dashboards json files.
 
 positional arguments:
-  ACTION                action to perform. Is one of 'export' or 'import'
-                        (default). export: lookup for dashboard name in
-                        Grafana and dump it to local file. import: import a
-                        local dashboard file (previously exported) to Grafana.
+  ACTION                action to perform. Is one of 'export', 'import'
+                        (default), or 'remove'.
+                        export: lookup for dashboard name in Grafana and dump
+                          it to local file.
+                        import: import a local dashboard file (previously 
+                          exported) to Grafana.
+                        remove: lookup for dashboard name in Grafana and remove
+                          it from Grafana server.
+
 
 optional arguments:
   -h, --help            show this help message and exit
+  -a, --allow_new       if a dashboard with same name exists in an another
+                        folder, allow to create a new dashboard with same name
+                        it that folder.
   -b BASE_PATH, --base_path BASE_PATH
                         set base directory to find default files.
   -c CONFIG_FILE, --config_file CONFIG_FILE
@@ -109,7 +119,7 @@ optional arguments:
   -d DASHBOARD_NAME, --dashboard_name DASHBOARD_NAME
                         name of dashboard to export.
   -g GRAFANA_LABEL, --grafana_label GRAFANA_LABEL
-                        label in the config file that represent the grafana to
+                        label in the config file that represents the grafana to
                         connect to.
   -f GRAFANA_FOLDER, --grafana_folder GRAFANA_FOLDER
                         the folder name where to import into Grafana.
@@ -125,9 +135,8 @@ optional arguments:
 ```
 import action preserves the version history.
 
-
 ***Example:***
-* **import** the dashboard located in default directory imports to grafana folder "Application"
+* **import** the dashboard located in default directory imports to grafana folder "Applications"
 
 ```bash
 $ grafana-import  -i my-first-dashboard_202104011548.json -f Applications -o
@@ -141,6 +150,12 @@ then you can go into Grafana Gui and find the folder Applications
 $ /usr/local/bin/grafana-import -d "my-first-dashboard" -p export
 OK: dashboard exported to './exports/my-first-dashboard_20210401165925.json'.
 ```
+When the dashboard is not required anymore, you can remove it:
+* **remove** the dashboard "my-first-dashboard" from folder "Applications"
 
+```bash
+$ grafana-import -f Applications -d "my-first-dashboard" remove
+OK: dashboard my-first-dashboard removed from 'Applications'.
+```
 
 

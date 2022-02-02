@@ -18,13 +18,12 @@ Suivi des modifications :
 
 from grafana_import.constants import (PKG_NAME, PKG_VERSION, CONFIG_NAME)
 
-import argparse, json, sys, os, re, socket, logging
-import unicodedata, traceback
+import argparse, json, sys, os, re, traceback
 
 from datetime import datetime
 
-from grafana_api.grafana_face import GrafanaFace
 import grafana_api.grafana_api as GrafanaApi
+import grafana_import.grafana as Grafana
 
 import yaml
 
@@ -32,103 +31,43 @@ import yaml
 config = None
 
 #******************************************************************************************
-def get_dashboard_content(config, args, grafana_api, dashboard_name):
+def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
 
+   output_file = base_path
+
+   if 'exports_path' in config['general'] and \
+      not re.search(r'^(\.|\/)?/', config['general']['exports_path']):
+      output_file = os.path.join(output_file, config['general']['exports_path'] )
+
+   if 'export_suffix' in config['general']:
+      dashboard_name += datetime.today().strftime(config['general']['export_suffix'])
+
+   if 'meta' in dashboard and 'folderId' in dashboard['meta'] and dashboard['meta']['folderId'] != 0:
+      dashboard_name = dashboard['meta']['folderTitle'] + '_' + dashboard_name
+
+   file_name = Grafana.remove_accents_and_space( dashboard_name )
+   output_file = os.path.join(output_file, file_name + '.json')
    try:
-      res = grafana_api.search.search_dashboards(
-	      type_='dash-db',
-         limit=config['grafana']['search_api_limit'],
-      )
-   except Exception as e:
-      print("error: {}".format(traceback.format_exc()) )
-#      print("error: {} - message: {}".format(e.__doc__, e.message) )
-      return None
-   dashboards = res
-   board = None
-   b_found = False
-   if args.verbose:
-      print("There are {0} dashboards:".format(len(dashboards)))
-   for board in dashboards:
-      if board['title'] == dashboard_name:
-         b_found = True
-         if args.verbose:
-            print("dashboard found")
-         break
-   if b_found and board:
-      try:
-         board = grafana_api.dashboard.get_dashboard(board['uid'])
-      except Exception as e:
-         print("error: {}".format(traceback.format_exc()) )
+      output = open(output_file, 'w')
+   except OSError as e:
+      print('File {0} error: {1}.'.format(output_file, e.strerror))
+      sys.exit(2)
+
+   content = None
+   if args.pretty:
+      content = json.dumps( dashboard['dashboard'], sort_keys=True, indent=2 )
    else:
-      board = None
-
-   return board
-
-#******************************************************************************************
-def get_folder(config, args, grafana_api, folder_name):
-
-   try:
-      res = grafana_api.folder.get_all_folders()
-   except Exception as e:
-      print("error: {}".format(traceback.format_exc()) )
-#      print("error: {} - message: {}".format(e.__doc__, e.message) )
-      return None
-
-   folders = res
-   folder = None
-
-   if args.verbose:
-      print("There are {0} folderss:".format(len(folders)))
-   for tmp_folder in folders:
-      if tmp_folder['title'] == folder_name:
-         if args.verbose:
-            print("Folder found")
-         folder = tmp_folder
-         break
-
-   return folder
-
-#******************************************************************************************
-def remove_accents_and_space(input_str):
-    nfkd_form = unicodedata.normalize('NFKD', input_str)
-    res = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
-    res = re.sub('\s+', '_', res)
-    return res
-
-#******************************************************************************************
-def save_dashboard(config, args, base_path, dashboard_name, params, action):
-
-    output_file = base_path + '/'
-
-    if 'exports_path' in config['general']:
-       output_file += config['general']['exports_path'] + '/'
-
-    if 'export_suffix' in config['general']:
-       dashboard_name += datetime.today().strftime(config['general']['export_suffix'])
-
-    file_name = remove_accents_and_space( dashboard_name )
-    output_file += file_name + '.json'
-    try:
-       output = open(output_file, 'w')
-    except OSError as e:
-       print('File {0} error: {1}.'.format(output_file, e.strerror))
-       sys.exit(2)
-
-    content = None
-    if args.pretty:
-       content = json.dumps( params, sort_keys=True, indent=2 )
-    else:
-       content = json.dumps( params )
-    output.write( content )
-    output.close()
-    print("OK: dashboard {1} to '{0}'.".format(output_file, action))
+      content = json.dumps( dashboard['dashboard'] )
+   output.write( content )
+   output.close()
+   print("OK: dashboard {1} to '{0}'.".format(output_file, action))
  
 #******************************************************************************************
 class myArgs:
   attrs = [ 'pattern'
                 , 'base_path', 'config_file'
                 , 'grafana', 'dashboard_name'
-                , 'pretty', 'overwrite', 'verbose'
+                , 'pretty', 'overwrite', 'allow_new', 'verbose'
                 ]
   def __init__(self):
 
@@ -150,6 +89,12 @@ def main():
    # get command line arguments
 
    parser = argparse.ArgumentParser(description='play with grafana dashboards json files.')
+
+   parser.add_argument('-a', '--allow_new'
+			, action='store_true'
+         , default=False
+			, help='if a dashboard with same name exists in an another folder, allow to create a new dashboard with same name it that folder.')
+
    parser.add_argument('-b', '--base_path'
 			, help='set base directory to find default files.')
    parser.add_argument('-c', '--config_file'
@@ -159,7 +104,7 @@ def main():
 			, help='name of dashboard to export.')
 
    parser.add_argument('-g', '--grafana_label'
-			, help='label in the config file that represent the grafana to connect to.'
+			, help='label in the config file that represents the grafana to connect to.'
          , default='default')
 
    parser.add_argument('-f', '--grafana_folder'
@@ -170,7 +115,8 @@ def main():
 
    parser.add_argument('-o', '--overwrite'
 			, action='store_true'
-			, help='if a dashboard with same name exists in folder, overwrite it with this new one.')
+         , default=False
+			, help='if a dashboard with same name exists in same folder, overwrite it with this new one.')
 
    parser.add_argument('-p', '--pretty'
 			, action='store_true'
@@ -186,9 +132,13 @@ def main():
 
    parser.add_argument('action', metavar='ACTION'
 			, nargs='?'
-			, choices=['import', 'export']
+			, choices=['import', 'export', 'remove']
 			, default='import'
-			, help='action to perform. Is one of \'export\' or \'import\' (default).\nexport: lookup for dashboard name in Grafana and dump it to local file.\nimport: import a local dashboard file (previously exported) to Grafana.') 
+			, help='action to perform. Is one of \'export\', \'import\' (default), or \'remove\'.\n' \
+            'export: lookup for dashboard name in Grafana and dump it to local file.\n' \
+            'import: import a local dashboard file (previously exported) to Grafana.\n' \
+            'remove: lookup for dashboard name in Grafana and remove it from Grafana server.'
+            )
    inArgs = myArgs()
    args = parser.parse_args(namespace=inArgs)
 
@@ -223,7 +173,16 @@ def main():
          args.verbose = config['general']['debug']
       else:
          args.verbose = False
+
+   if args.allow_new is None:
+      args.allow_new = False
+
+   if args.overwrite is None:
+      args.overwrite = False
   
+   if args.pretty is None:
+      args.pretty = False
+
    #print( json.dumps(config, sort_keys=True, indent=4) )
 
 #************
@@ -247,26 +206,34 @@ def main():
    if not args.grafana_label in config['grafana']:
       print("ERROR: invalid grafana config label has been specified (-g {0}).".format(args.grafana_label))
       sys.exit(1)
-      
+   
+   #** init default conf from grafana with set label.
+   config['grafana'] = config['grafana'][args.grafana_label]
+
 #************
-   grafana_api = GrafanaFace(
-      auth=config['grafana'][args.grafana_label]['token'],
-      host=config['grafana'][args.grafana_label]['host'],
-      protocol=config['grafana'][args.grafana_label]['protocol'],
-      port=config['grafana'][args.grafana_label]['port'],
-      verify=config['grafana'][args.grafana_label]['verify_ssl'],
-   )
-   try:
-      res = grafana_api.health.check()
-      if res['database'] != 'ok':
-         print("grafana health_check is not KO.")
-         sys.exit(1)
-      elif args.verbose:
-         print("grafana health_check is OK.")
-   except Exception as e:
-      print("ERROR: {} - message: {}".format(res, e.message) )
+   if not 'token' in config['grafana']:
+      print("ERROR: no token has been specified in grafana config label '{0}'.".format(args.grafana_label))
       sys.exit(1)
 
+   params = {
+      'host': config['grafana'].get('host', 'localhost'),
+      'protocol': config['grafana'].get('protocol', 'http'),
+      'port': config['grafana'].get('port', '3000'),
+      'token': config['grafana'].get('token'),
+      'verify_ssl': config['grafana'].get('verify_ssl', True),
+      'search_api_limit': config['grafana'].get('search_api_limit', 5000),
+      'folder': config['general'].get('grafana_folder', 'General'),
+      'overwrite': args.overwrite,
+      'allow_new': args.allow_new,
+   }
+
+   try:
+      grafana_api = Grafana.Grafana( **params )
+   except Exception as e:
+      print("ERROR: {} - message: {}".format(e) )
+      sys.exit(1)
+
+   #*******************************************************************************
    if args.action == 'import':
       if args.dashboard_file is None:
          print('ERROR: no file to import provided!')
@@ -274,10 +241,11 @@ def main():
       import_path = ''
       import_file = args.dashboard_file
       if not re.search(r'^(?:(?:/)|(?:\.?\./))', import_file):
-         import_path = base_path + '/'
+         import_path = base_path
          if 'imports_path' in config['general']:
-            import_path += config['general']['imports_path'] + '/'
-      import_path += import_file
+            import_path = os.path.join(import_path, config['general']['imports_path'] )
+      import_path = os.path.join(import_path, import_file)
+
       try:
          input = open(import_path, 'r')
       except OSError as e:
@@ -293,86 +261,58 @@ def main():
          print("ERROR: reading '{0}': {1}".format(import_path, e))
          sys.exit(1)
 
-      #** check dashboard existence
-      #** dash from file has no meta data (folder infos)
-      new_dash = { 'dashboard': dash }
-
-      if 'uid' in dash:
-         try:
-            old_dash = grafana_api.dashboard.get_dashboard(dash['uid'])
-         except GrafanaApi.GrafanaClientError:
-            old_dash = None
-
-         if old_dash is not None:
-            new_dash['overwrite'] = True
-            if not config['check_folder']:
-               if 'meta' in old_dash and 'folderUrl' in old_dash['meta']:
-                  config['general']['grafana_folder'] = old_dash['meta']['folderTitle']
-                  new_dash['folderId'] = old_dash['meta']['folderId']
-                  config['check_folder'] = False
-               else:
-                  config['general']['grafana_folder'] = 'General'
-            if config['general']['grafana_folder'] == 'General':
-               config['check_folder'] = False
-         else:
-            new_dash['overwrite'] = args.overwrite
-            dash['version'] = 1
-            if not config['check_folder']:
-               config['general']['grafana_folder'] = 'General'
-               config['check_folder'] = False
-
-         #** check folder existence
-         if config['check_folder']:
-            res = get_folder(config, args, grafana_api, config['general']['grafana_folder'])
-            if res is None:
-               try:
-                  res = grafana_api.folder.create_folder(config['general']['grafana_folder'])
-               except Exception as e:
-                  print("error: {}".format(traceback.format_exc()) )
-                  sys.exit(1)
-
-               if res:
-                  if args.verbose:
-                     print("folder created")
-                  #** update folder
-                  new_dash['folderId'] = res['id']
-               else:
-                 print("KO: folder creation failed.")
-                 sys.exit(1)
-            else:
-               new_dash['folderId'] = res['id']
-         elif 'folderId' not in dash:
-            new_dash['folderId'] = 0 # 0 for  default 'General' pseudo folder
-         new_dash['message'] = 'imported from grafana-import.'
-         try:
-            res = grafana_api.dashboard.update_dashboard(new_dash)
-         except GrafanaApi.GrafanaClientError as e:
-            print("ERROR({1}): {0} ".format(e.message,e.status_code))
-            print("maybe you want to set --overwrite option.")
-            sys.exit(1)
-
-         except Exception as e:
-            print("error: {}".format(traceback.format_exc()) )
-            sys.exit(1)
-
-         if res['status']:
-            print("OK: dashboard {0} imported into '{1}'.".format(dash['title'], config['general']['grafana_folder']))
-            sys.exit(0)
-         else:
-            print("KO: dashboard {0} not imported into '{1}'.".format(dash['title'], config['general']['grafana_folder']))
-            sys.exit(1)
-      else:
-         print("error invalid dashboard file '{0}': can't find dashboard uid".format(import_path))
+      try:
+         res = grafana_api.import_dashboard( dash )
+      except GrafanaApi.GrafanaClientError as exp:
+         print('ERROR: {0}.'.format(exp))
+         print("maybe you want to set --overwrite option.")
          sys.exit(1)
-   else:   # export
-     dash = get_dashboard_content(config, args, grafana_api, config['general']['dashboard_name'])
-     if dash is not None:
-        save_dashboard(config, args, base_path, config['general']['dashboard_name'], dash['dashboard'], 'exported')
-        sys.exit(0)
+
+      if res:
+         print("OK: dashboard '{0}' imported into '{1}'.".format(dash['title'], grafana_api.grafana_folder))
+         sys.exit(0)
+      else:
+         print("KO: dashboard '{0}' not imported into '{1}'.".format(dash['title'], grafana_api.grafana_folder))
+         sys.exit(1)
+
+   #*******************************************************************************
+   elif args.action == 'remove':
+      try:
+         res = grafana_api.remove_dashboard(config['general']['dashboard_name'])
+         print("OK: dashboard '{0}' removed.".format(config['general']['dashboard_name']))
+      except Grafana.GrafanaDashboardNotFoundError as exp:
+         print("KO: dashboard '{0}' not found in '{1}".format(exp.dashboard, exp.folder))
+         sys.exit(0)
+      except Grafana.GrafanaFolderNotFoundError as exp:
+         print("KO: folder '{0}' not found".format(exp.folder))
+         sys.exit(0)
+      except GrafanaApi.GrafanaBadInputError as exp:
+         print("KO: dashboard '{0}' not removed: {1}".format(config['general']['dashboard_name'], exp))
+         sys.exit(1)
+      except Exception as exp:
+         print("error: dashboard '{0}' remove exception '{1}'".format(config['general']['dashboard_name'], traceback.format_exc()))
+         sys.exit(1)
+
+   #*******************************************************************************
+   else:   # export or
+      try:
+         dash = grafana_api.export_dashboard(config['general']['dashboard_name'])
+      except Grafana.GrafanaNotFoundError:
+         print("KO: dashboard name not found '{0}'".format(config['general']['dashboard_name']))
+         sys.exit(1)
+      except Exception as exp:
+         print("error: dashboard '{0}' export exception '{1}'".format(config['general']['dashboard_name'], traceback.format_exc()))
+         sys.exit(1)
+
+      if dash is not None:
+         save_dashboard(config, args, base_path, config['general']['dashboard_name'], dash, 'exported')
+         sys.exit(0)
 
 # end main...
-#***********************************************************************************************
 #***********************************************************************************************
 
 if __name__  == '__main__':
    main()
+
+#***********************************************************************************************
+# over
