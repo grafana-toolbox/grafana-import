@@ -22,7 +22,7 @@ import argparse, json, sys, os, re, traceback
 
 from datetime import datetime
 
-import grafana_api.grafana_api as GrafanaApi
+import grafana_client.client as GrafanaApi
 import grafana_import.grafana as Grafana
 
 import yaml

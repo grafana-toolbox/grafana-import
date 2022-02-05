@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 #******************************************************************************************
-from tkinter.messagebox import NO
-import grafana_api.grafana_face as GrafanaFace
-import grafana_api.grafana_api as GrafanaApi
+
+import grafana_client.api as GrafanaApi
+import grafana_client.client as GrafanaClient
 import re, traceback, unicodedata
 
 from grafana_import.constants import (PKG_NAME)
@@ -74,7 +74,7 @@ class Grafana(object):
       config['port'] = kwargs.get('port', 3000)
       config['token'] = kwargs.get('token', None)
       if config['token'] is None:
-         raise GrafanaApi.GrafanaBadInputError('grafana token is not defined')
+         raise GrafanaClient.GrafanaBadInputError('grafana token is not defined')
 
       config['verify_ssl'] = kwargs.get('verify_ssl', True)
 
@@ -90,7 +90,7 @@ class Grafana(object):
       self.allow_new = kwargs.get('allow_new', False)
 
       #* build an aapi object
-      self.grafana_api = GrafanaFace.GrafanaFace(
+      self.grafana_api = GrafanaApi.GrafanaApi(
          auth=config['token'],
          host=config['host'],
          protocol=config['protocol'],

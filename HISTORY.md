@@ -2,6 +2,9 @@
 
 # History
 
+## 0.2.0 (2022-02-05)
+* migrate from grafana_api to grafana_client
+  
 ## 0.1.0 (2022-02-01)
 * fixe behavior for dashboard moved from one folder to another
 

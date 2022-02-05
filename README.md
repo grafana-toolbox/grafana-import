@@ -9,7 +9,7 @@ The aim of this tool is to:
 
 ## Install using this repo
 
-install with bitbuckt repo or github repo.
+install github repository.
 
 ```bash
     $ pip install git+https://github.com/peekjef72/grafana-import-tool.git
@@ -21,7 +21,7 @@ install with bitbuckt repo or github repo.
 * python >3.6
 * python modules:
   - jinja2
-  - grafana-api 1.0.3 what will pull the dependencies
+  - grafana_client 2.0.0 what will pull the dependencies
     - requests
     - idna
     - urllib3
@@ -29,12 +29,7 @@ install with bitbuckt repo or github repo.
     - chardet
 * Access to a Grafana API server.
 * A `Token` of an `Admin` role (grafana APIKey).
-##WARNING##: 
- grafana-api package must be install from 'forked' repository (not official):
 
-```bash
-    $ pip install git+https://github.com/peekjef72/grafana_api.git
-```
 ## Configuration
 The configuration is stored in a YAML file.
 
@@ -77,11 +72,11 @@ example:
 ## Usages
 build a directory structure:
 - grafana-import/
-	- conf/grafana-import.json
+	- conf/grafana-import.yml
 	where your main configuration file is
 	- exports/
 	where your exported dashboards will be stored.
-	- importds/
+	- imports/
 	where your dashboards to import are stored.
 
 then enter into your directory and type in you commands.
