@@ -12,7 +12,14 @@ The aim of this tool is to:
 install github repository.
 
 ```bash
-    $ pip install git+https://github.com/peekjef72/grafana-import-tool.git
+pip install git+https://github.com/peekjef72/grafana-import-tool.git
+```
+
+## Install using this repo
+install from pypi
+
+```bash
+pip3 install grafana-import-tool 
 ```
 
 ## Requirements:
@@ -21,7 +28,7 @@ install github repository.
 * python >3.6
 * python modules:
   - jinja2
-  - grafana_client 2.0.0 what will pull the dependencies
+  - grafana-client 2.0.0 what will pull the dependencies
     - requests
     - idna
     - urllib3
