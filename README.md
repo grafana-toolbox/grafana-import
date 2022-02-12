@@ -1,6 +1,6 @@
 # Grafana import Tool
 
-A python3 based application to play with grafana dashboards using [Grafana API](https://grafana.com/docs/grafana/latest/http_api/) and a python interface [grafana_api](https://github.com/m0nhawk/grafana_api)
+A python3 based application to play with grafana dashboards using [Grafana API](https://grafana.com/docs/grafana/latest/http_api/) and a python interface [grafana-client](https://github.com/panodata/grafana-client)
 
 The aim of this tool is to:
 1. Export easilly an existing Grafana dashboard from a folder.
