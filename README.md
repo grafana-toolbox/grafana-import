@@ -15,7 +15,7 @@ install github repository.
 pip install git+https://github.com/peekjef72/grafana-import-tool.git
 ```
 
-## Install using this repo
+## Install using Pypi
 install from pypi
 
 ```bash
@@ -48,7 +48,7 @@ It contains 2 parts:
 	* **import_path**: where to load the dashboards before to import then into grafana server.
 - **grafana**: for grafana access settings; you can define several grafana acces with different api_key or grafana server url
   * **label**: a label to refer this grafana server default at least
-    * **protocal**, **host**, **port**: use to build the access url
+    * **protocol**, **host**, **port**: use to build the access url
     * **verify_ssl**: to check ssl certificate or not
     * **token**: APIKEY with admin right from Grafana to access the REST API.
     * **search_api_limit**: the maximum element to retrieve on search over API.
