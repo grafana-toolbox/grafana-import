@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at https://github.com/peekjef72/grafana-import/issues.
+Report bugs at https://github.com/peekjef72/grafana-import-tool/issues.
 
 If you are reporting a bug, please include:
 
@@ -29,13 +29,13 @@ is open to whoever wants to implement it.
 
 ### Write Documentation
 
-Centreon SDK Python could always use more documentation, whether as part of the 
-official Centreon SDK Python docs, in docstrings, or even on the web in blog posts,
+This tool could always use more documentation, whether as part of the 
+official docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at https://github.com/peekjef72/grafana-import/issues
+The best way to send feedback is to file an issue at https://github.com/peekjef72/grafana-import-tool/issues
 
 If you are proposing a feature:
 
@@ -46,36 +46,35 @@ If you are proposing a feature:
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up `centreonapi` for
+Ready to contribute? Here's how to set up `grafana-import` for
 local development.
 
-1. Fork_ the `centreon-sdk-python` repo on GitHub.
-2. Clone your fork locally::
+1. _Fork_ the `grafana-import-tool` repo on GitHub.
 
-    $ git clone git@github.com:your_name_here/centreon-sdk-python.git
+ [Fork](https://github.com/peekjef72/grafana-import-tool/fork)
 
-3. Create a branch for local development::
+2. Clone your fork locally:
+
+    $ git clone git@github.com:your_name_here/grafana-import-tool.git
+
+3. Create a branch for local development:
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
 Now you can make your changes locally.
 
 4. When you're done making changes, check that your changes pass style and unit
-   tests, including testing other Python versions with tox::
+   tests, including testing other Python versions with grafana-import-tool
 
-    $ tox
+    $ grafana-import
 
-To get tox, just pip install it.
-
-5. Commit your changes and push your branch to GitHub::
+5. Commit your changes and push your branch to GitHub:
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
 6. Submit a pull request through the GitHub website.
-
- [Fork](https://github.com/guillaumewatteeux/centreon-sdk-python/fork)
 
 ## Pull Request Guidelines
 
@@ -85,12 +84,10 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.3, and for PyPy.
-
+3. The pull request should work for Python 3.6, and for PyPy.
 
 ## Tips
 
-To run a subset of tests::
+To run a subset of tests:
 
 	 $ pytest tests
-
