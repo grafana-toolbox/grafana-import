@@ -1,8 +1,12 @@
 # Grafana import Tool
 
-A python3 based application to play with grafana dashboards using [Grafana API](https://grafana.com/docs/grafana/latest/http_api/) and a python interface [grafana-client](https://github.com/panodata/grafana-client)
+A python3 based application to play with grafana dashboards using
+[Grafana API](https://grafana.com/docs/grafana/latest/http_api/)
+and a python interface
+[grafana-client](https://github.com/panodata/grafana-client)
 
 The aim of this tool is to:
+
 1. Export easilly an existing Grafana dashboard from a folder.
 2. Import a dashboard in JSON format into a Grafana.
 3. Remove a dashboard
@@ -15,11 +19,12 @@ install github repository.
 pip install git+https://github.com/peekjef72/grafana-import-tool.git
 ```
 
-## Install using Pypi
-install from pypi
+## Install using PyPI
+
+Install from PyPI
 
 ```bash
-pip3 install grafana-import-tool 
+pip3 install grafana-import
 ```
 
 ## Requirements:
@@ -38,9 +43,11 @@ pip3 install grafana-import-tool
 * A `Token` of an `Admin` role (grafana APIKey).
 
 ## Configuration
+
 The configuration is stored in a YAML file.
 
 It contains 2 parts:
+
 * **general**: for script env.
 	* **debug**: enable verbose (debug) trace (for dev only...)
 	* **export_suffix**: when exporting a dashboard, append that suffix to the file name. The suffix can contain plain text and pattern that is translated with strftime command.
@@ -77,6 +84,7 @@ example:
 </details>
 
 ## Usages
+
 build a directory structure:
 - grafana-import/
 	- conf/grafana-import.yml
@@ -159,5 +167,3 @@ When the dashboard is not required anymore, you can remove it:
 $ grafana-import -f Applications -d "my-first-dashboard" remove
 OK: dashboard my-first-dashboard removed from 'Applications'.
 ```
-
-
