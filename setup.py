@@ -5,7 +5,8 @@ from setuptools import setup, find_packages
 name = PKG_NAME
 version = PKG_VERSION
 requires = [
-    'grafana-api',
+    'grafana-client',
+    'pyyaml',
     'jinja2'
 ]
 
