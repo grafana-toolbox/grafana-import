@@ -297,7 +297,7 @@ def main():
    else:   # export or
       try:
          dash = grafana_api.export_dashboard(config['general']['dashboard_name'])
-      except Grafana.GrafanaNotFoundError:
+      except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
          print("KO: dashboard name not found '{0}'".format(config['general']['dashboard_name']))
          sys.exit(1)
       except Exception as exp:
