@@ -12,4 +12,3 @@
       token: "____APIKEY____"
       search_api_limit: 5000
       verify_ssl: true
-
