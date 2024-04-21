@@ -3,6 +3,7 @@
 
 #******************************************************************************************
 
+import typing as t
 import grafana_client.api as GrafanaApi
 import grafana_client.client as GrafanaClient
 import re, traceback, unicodedata
@@ -54,15 +55,15 @@ def remove_accents_and_space(input_str):
    """
    nfkd_form = unicodedata.normalize('NFKD', input_str)
    res = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
-   res = re.sub('\s+', '_', res)
+   res = re.sub(r'\s+', '_', res)
 
    return res
 
 #******************************************************************************************
 class Grafana(object):
    #* to store the folders list, dashboards list (kind of cache)
-   folders = []
-   dashboards =[]
+   folders: t.List[t.Any] = []
+   dashboards: t.List[t.Any] = []
 
    #***********************************************
    def __init__( *args, **kwargs ):
@@ -159,25 +160,28 @@ class Grafana(object):
             dashboard (dict [json])
       """
 
-      board = self.find_dashboard(dashboard_name)
+      try:
+         board = self.find_dashboard(dashboard_name)
 
-      if board is not None:
+         if board is None:
+            raise GrafanaClient.GrafanaClientError(response=None, message="Not Found", status_code=404)
 
-         #* collect the board object itself from it uid.
-         try:
-            board = self.grafana_api.dashboard.get_dashboard(board['uid'])
-         except Exception as e:
+         # Fetch the dashboard JSON representation by UID.
+         board = self.grafana_api.dashboard.get_dashboard(board['uid'])
+         return board
+      except Exception as ex:
+         if isinstance(ex, GrafanaClient.GrafanaClientError) and ex.status_code == 404:
+            raise GrafanaDashboardNotFoundError(
+               dashboard_name,
+               self.grafana_folder,
+               f"Dashboard not found: {dashboard_name}")
+         else:
             raise
-      else:
-         raise GrafanaDashboardNotFoundError(dashboard_name, self.grafana_folder, 'dashboard not found')
-
-      return board
-
 
    #***********************************************
    def remove_dashboard(self, dashboard_name):
       """
-      retrive the dashboard object from Grafana server and remove it.
+      Retrieve the dashboard object from Grafana server and remove it.
          params:
             dashboard_name (str): name of the dashboard to retrieve
          result:
@@ -195,7 +199,10 @@ class Grafana(object):
          #** check 'custom' folder existence (custom != General)
          folder = self.get_folder( self.grafana_folder )
          if folder is None:
-            raise GrafanaFolderNotFoundError(self.grafana_folder, 'folder not found')
+            raise GrafanaFolderNotFoundError(
+               self.grafana_folder,
+               f"Folder not found: {self.grafana_folder}",
+            )
 
       #* collect the board object itself from it uid.
       try:

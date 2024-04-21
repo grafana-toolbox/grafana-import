@@ -1,2 +1,3 @@
 include *.md
 include LICENSE
+recursive-include grafana_import *.yml *.yaml

@@ -1,0 +1,114 @@
+[tool.black]
+line-length = 120
+
+[tool.coverage.run]
+branch = false
+omit = [
+  "tests/*",
+]
+source = ["grafana_import"]
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+
+[tool.mypy]
+packages = ["grafana_import"]
+install_types = true
+ignore_missing_imports = true
+implicit_optional = true
+non_interactive = true
+
+[tool.pytest.ini_options]
+addopts = "-rA --verbosity=3 --cov --cov-report=term-missing --cov-report=xml"
+minversion = "2.0"
+log_level = "DEBUG"
+log_cli_level = "DEBUG"
+log_format = "%(asctime)-15s [%(name)-24s] %(levelname)-8s: %(message)s"
+testpaths = [
+  "grafana_import",
+  "tests",
+]
+xfail_strict = true
+markers = [
+]
+
+[tool.ruff]
+line-length = 120
+
+lint.select = [
+  # Bandit
+  "S",
+  # Bugbear
+  "B",
+  # Builtins
+  "A",
+  # comprehensions
+  "C4",
+  # eradicate
+  "ERA",
+  # flake8-2020
+  "YTT",
+  # isort
+  "I",
+  # pandas-vet
+  "PD",
+  # print
+  "T20",
+  # Pycodestyle
+  "E",
+  "W",
+  # Pyflakes
+  "F",
+  # return
+  "RET",
+]
+
+lint.extend-ignore = [
+  # Unnecessary variable assignment before `return` statement
+  "RET504",
+  # Unnecessary `elif` after `return` statement
+  "RET505",
+]
+
+# Intermediary ignores, until the code base has been improved further.
+lint.exclude = [
+  "grafana_import/cli.py",
+  "grafana_import/grafana.py",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # Use of `assert` detected
+
+
+# ===================
+# Tasks configuration
+# ===================
+
+[tool.poe.tasks]
+
+check = [
+  "lint",
+  "test",
+]
+
+format = [
+  { cmd = "black ." },
+  # Configure Ruff not to auto-fix (remove!) unused variables (F841) and `print` statements (T201).
+  { cmd = "ruff check --fix --ignore=ERA --ignore=F401 --ignore=F841 --ignore=T20 ." },
+  { cmd = "pyproject-fmt --keep-full-version pyproject.toml" },
+]
+
+lint = [
+  { cmd = "ruff check ." },
+  # { cmd = "black --check ." },
+  { cmd = "validate-pyproject pyproject.toml" },
+  { cmd = "mypy" },
+]
+
+release = [
+  { cmd = "python -m build" },
+  { cmd = "twine upload dist/*" },
+]
+
+test = { cmd = "pytest" }
