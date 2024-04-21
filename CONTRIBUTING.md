@@ -1,7 +1,7 @@
 # Contributing
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given. 
+Contributions are welcome, and they are greatly appreciated. Every
+little helps, and credit will always be given.
 
 You can contribute in many ways:
 
@@ -88,6 +88,5 @@ Before you submit a pull request, check that it meets these guidelines:
 
 ## Tips
 
-To run a subset of tests:
-
-	 $ pytest tests
+For installing a development sandbox, please refer to the documentation
+about the [development sandbox](./docs/sandbox.md).

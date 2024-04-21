@@ -1,7 +1,8 @@
 import os
 
+from setuptools import find_packages, setup
+
 from grafana_import.constants import PKG_NAME, PKG_VERSION
-from setuptools import setup, find_packages
 
 # Global variables
 requires = [
@@ -9,6 +10,24 @@ requires = [
     'jinja2<4',
     'pyyaml<7',
 ]
+
+extras = {
+    "develop": [
+        "black<25",
+        "mypy<1.10",
+        "poethepoet<0.26",
+        "pyproject-fmt<1.8",
+        "ruff<0.5",
+        "validate-pyproject<0.17",
+    ],
+    "test": [
+        "grafana-dashboard==0.1.1",
+        "pydantic<2",
+        "pytest<9",
+        "pytest-cov<6",
+        "responses<0.26",
+    ],
+}
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, "README.md")).read()
@@ -30,6 +49,7 @@ setup(
     },
     packages=find_packages(),
     install_requires=requires,
+    extras_require=extras,
     package_data={'': ['conf/*']},
     classifiers=[
         "Programming Language :: Python",
@@ -47,9 +67,6 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

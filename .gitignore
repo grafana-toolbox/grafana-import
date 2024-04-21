@@ -6,3 +6,5 @@ build/*
 dist/*
 *.egg-*/
 .venv*
+.coverage*
+coverage.xml

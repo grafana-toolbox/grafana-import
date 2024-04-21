@@ -25,7 +25,7 @@ from datetime import datetime
 import grafana_client.client as GrafanaApi
 import grafana_import.grafana as Grafana
 
-import yaml
+from grafana_import.util import load_yaml_config, grafana_settings
 
 #******************************************************************************************
 config = None
@@ -34,18 +34,19 @@ config = None
 def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
 
    output_file = base_path
+   file_name = dashboard_name
 
    if 'exports_path' in config['general'] and \
       not re.search(r'^(\.|\/)?/', config['general']['exports_path']):
       output_file = os.path.join(output_file, config['general']['exports_path'] )
 
    if 'export_suffix' in config['general']:
-      dashboard_name += datetime.today().strftime(config['general']['export_suffix'])
+      file_name += datetime.today().strftime(config['general']['export_suffix'])
 
    if 'meta' in dashboard and 'folderId' in dashboard['meta'] and dashboard['meta']['folderId'] != 0:
-      dashboard_name = dashboard['meta']['folderTitle'] + '_' + dashboard_name
+      file_name = dashboard['meta']['folderTitle'] + '_' + file_name
 
-   file_name = Grafana.remove_accents_and_space( dashboard_name )
+   file_name = Grafana.remove_accents_and_space( file_name )
    output_file = os.path.join(output_file, file_name + '.json')
    try:
       output = open(output_file, 'w')
@@ -60,7 +61,7 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
       content = json.dumps( dashboard['dashboard'] )
    output.write( content )
    output.close()
-   print("OK: dashboard {1} to '{0}'.".format(output_file, action))
+   print(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
  
 #******************************************************************************************
 class myArgs:
@@ -154,19 +155,7 @@ def main():
       else:
          config_file = args.config_file
 
-   config = None
-   try:
-      with open(config_file, 'r') as cfg_fh:
-         try:
-            config = yaml.safe_load(cfg_fh)
-         except yaml.scanner.ScannerError as exc:
-            mark = exc.problem_mark
-            print("Yaml file parsing unsuccessul : %s - line: %s column: %s => %s" % (config_file, mark.line+1, mark.column+1, exc.problem) )
-   except Exception as exp:
-      print('ERROR: config file not read: %s' % str(exp))
-
-   if config is None:
-      sys.exit(1)
+   config = load_yaml_config(config_file)
 
    if args.verbose is None:
       if 'debug' in config['general']:
@@ -203,34 +192,16 @@ def main():
    if 'export_suffix' not in config['general'] or config['general']['export_suffix'] is None:
       config['general']['export_suffix'] = "_%Y%m%d%H%M%S"
 
-   if not args.grafana_label in config['grafana']:
-      print("ERROR: invalid grafana config label has been specified (-g {0}).".format(args.grafana_label))
-      sys.exit(1)
-   
-   #** init default conf from grafana with set label.
-   config['grafana'] = config['grafana'][args.grafana_label]
-
-#************
-   if not 'token' in config['grafana']:
-      print("ERROR: no token has been specified in grafana config label '{0}'.".format(args.grafana_label))
-      sys.exit(1)
-
-   params = {
-      'host': config['grafana'].get('host', 'localhost'),
-      'protocol': config['grafana'].get('protocol', 'http'),
-      'port': config['grafana'].get('port', '3000'),
-      'token': config['grafana'].get('token'),
-      'verify_ssl': config['grafana'].get('verify_ssl', True),
-      'search_api_limit': config['grafana'].get('search_api_limit', 5000),
-      'folder': config['general'].get('grafana_folder', 'General'),
-      'overwrite': args.overwrite,
-      'allow_new': args.allow_new,
-   }
+   params = grafana_settings(config=config, label=args.grafana_label)
+   params.update({
+         'overwrite': args.overwrite,
+         'allow_new': args.allow_new,
+   })
 
    try:
       grafana_api = Grafana.Grafana( **params )
    except Exception as e:
-      print("ERROR: {} - message: {}".format(e) )
+      print(f"ERROR: {e}")
       sys.exit(1)
 
    #*******************************************************************************
@@ -268,44 +239,49 @@ def main():
          print("maybe you want to set --overwrite option.")
          sys.exit(1)
 
+      title = dash['title']
+      folder_name = grafana_api.grafana_folder
       if res:
-         print("OK: dashboard '{0}' imported into '{1}'.".format(dash['title'], grafana_api.grafana_folder))
+         print(f"OK: Dashboard '{title}' imported into folder '{folder_name}'")
          sys.exit(0)
       else:
-         print("KO: dashboard '{0}' not imported into '{1}'.".format(dash['title'], grafana_api.grafana_folder))
+         print(f"KO: Dashboard '{title}' not imported into folder '{folder_name}'")
          sys.exit(1)
 
    #*******************************************************************************
    elif args.action == 'remove':
+      dashboard_name = config['general']['dashboard_name']
       try:
-         res = grafana_api.remove_dashboard(config['general']['dashboard_name'])
-         print("OK: dashboard '{0}' removed.".format(config['general']['dashboard_name']))
+         res = grafana_api.remove_dashboard(dashboard_name)
+         print(f"OK: Dashboard removed: {dashboard_name}")
+         sys.exit(0)
       except Grafana.GrafanaDashboardNotFoundError as exp:
-         print("KO: dashboard '{0}' not found in '{1}".format(exp.dashboard, exp.folder))
+         print(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
          sys.exit(0)
       except Grafana.GrafanaFolderNotFoundError as exp:
-         print("KO: folder '{0}' not found".format(exp.folder))
+         print(f"KO: Folder not found: {exp.folder}")
          sys.exit(0)
       except GrafanaApi.GrafanaBadInputError as exp:
-         print("KO: dashboard '{0}' not removed: {1}".format(config['general']['dashboard_name'], exp))
+         print(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
          sys.exit(1)
       except Exception as exp:
-         print("error: dashboard '{0}' remove exception '{1}'".format(config['general']['dashboard_name'], traceback.format_exc()))
+         print("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
          sys.exit(1)
 
    #*******************************************************************************
    else:   # export or
+      dashboard_name = config['general']['dashboard_name']
       try:
-         dash = grafana_api.export_dashboard(config['general']['dashboard_name'])
+         dash = grafana_api.export_dashboard(dashboard_name)
       except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
-         print("KO: dashboard name not found '{0}'".format(config['general']['dashboard_name']))
+         print("KO: Dashboard name not found: {0}".format(dashboard_name))
          sys.exit(1)
       except Exception as exp:
-         print("error: dashboard '{0}' export exception '{1}'".format(config['general']['dashboard_name'], traceback.format_exc()))
+         print("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
          sys.exit(1)
 
       if dash is not None:
-         save_dashboard(config, args, base_path, config['general']['dashboard_name'], dash, 'exported')
+         save_dashboard(config, args, base_path, dashboard_name, dash, 'exported')
          sys.exit(0)
 
 # end main...

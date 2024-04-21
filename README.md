@@ -155,5 +155,16 @@ grafana-import -f Applications -d "my-first-dashboard" remove
 ```
 
 
+## Contributing
+
+Contributions are welcome, and they are greatly appreciated. You can contribute
+in many ways, and credit will always be given.
+
+For learning more how to contribute, see the [contribution guidelines] and
+learn how to set up a [development sandbox].
+
+
+[contribution guidelines]: ./CONTRIBUTING.md
+[development sandbox]: ./docs/sandbox.md
 [Grafana HTTP API]: https://grafana.com/docs/grafana/latest/http_api/
 [grafana-client]: https://github.com/panodata/grafana-client
