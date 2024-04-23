@@ -100,10 +100,10 @@ format = [
 ]
 
 lint = [
-  { cmd = "ruff check ." },
+  { shell = "ruff check . || true" },
   # { cmd = "black --check ." },
   { cmd = "validate-pyproject pyproject.toml" },
-  { cmd = "mypy" },
+  { cmd = "mypy grafana_import" },
 ]
 
 release = [

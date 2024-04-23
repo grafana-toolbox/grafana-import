@@ -16,12 +16,15 @@ extras = {
         "black<25",
         "mypy<1.10",
         "poethepoet<0.26",
-        "pyproject-fmt<1.8",
-        "ruff<0.5",
+        "pyproject-fmt<1.8; python_version>='3.7'",
+        "ruff<0.5; python_version>='3.7'",
         "validate-pyproject<0.17",
     ],
     "test": [
-        "grafana-dashboard==0.1.1",
+        "grafana-dashboard<0.2; python_version>='3.7'",
+        "importlib-resources<7; python_version<'3.9'",
+        # Pydantic is pulled in by grafana-dashboard. Pydantic 1.x is needed on Python 3.12.
+        # Otherwise, `Error when building FieldInfo from annotated attribute` happens.
         "pydantic<2",
         "pytest<9",
         "pytest-cov<6",
@@ -67,6 +70,9 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
