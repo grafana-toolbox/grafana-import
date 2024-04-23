@@ -321,15 +321,19 @@ class Grafana(object):
                new_dash['dashboard']['uid'] = None
                new_dash['dashboard']['id'] = None
             else:
-               raise GrafanaApi.GrafanaBadInputError("dashboard already exists in an another folder and allow_new is False.")
+               raise GrafanaClient.GrafanaBadInputError(
+                  "Dashboard with the same title already exists in another folder. "
+                  "Use `allow_new` to permit creation in a different folder.")
          #** case d) send a copy to existing dash : update existing
          elif new_dash['folderId'] == old_dash['folderId']:
-            if new_dash['dashboard']['uid'] != old_dash['uid']:
+            if 'uid' not in new_dash['dashboard'] or new_dash['dashboard']['uid'] != old_dash['uid']:
                if self.overwrite:
                   new_dash['dashboard']['uid'] = old_dash['uid']
                   new_dash['dashboard']['id'] = old_dash['id']
                else:
-                  raise GrafanaApi.GrafanaBadInputError("dashboard already exists in this folder with an another id and overwrite is False.")
+                  raise GrafanaClient.GrafanaBadInputError(
+                     "Dashboard with the same title already exists in this folder with another uid. "
+                     "Use `overwrite` to permit overwriting it.")
       else:
          #force the creation of a new dashboard
          new_dash['dashboard']['uid'] = None

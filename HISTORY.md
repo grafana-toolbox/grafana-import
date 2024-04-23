@@ -7,6 +7,7 @@
   In this mode, the Grafana URL can optionally be defined using the
   environment variable `GRAFANA_URL`.
 * Fix exit codes in failure situations.
+* Fix exception handling and propagation in failure situations.
 
 ## 0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client
