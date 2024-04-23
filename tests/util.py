@@ -3,9 +3,7 @@ import io
 import json
 import typing as t
 
-from grafana_dashboard.manual_models import TimeSeries
-from grafana_dashboard.model.dashboard_types_gen import Dashboard, GridPos
-from grafana_dashboard.model.prometheusdataquery_types_gen import PrometheusDataQuery
+import pytest
 from responses import RequestsMock
 
 if t.TYPE_CHECKING:
@@ -39,6 +37,14 @@ def mkdashboard():
 
     https://github.com/fzyzcjy/grafana_dashboard_python/blob/master/examples/python_to_json/input_python/dashboard-one.py
     """
+    pytest.importorskip(
+        "grafana_dashboard",
+        reason="Skipping dashboard generation because `grafana-dashboard` is not available")
+
+    from grafana_dashboard.manual_models import TimeSeries
+    from grafana_dashboard.model.dashboard_types_gen import Dashboard, GridPos
+    from grafana_dashboard.model.prometheusdataquery_types_gen import PrometheusDataQuery
+
     dashboard = Dashboard(
         title='Dashboard One',
         panels=[

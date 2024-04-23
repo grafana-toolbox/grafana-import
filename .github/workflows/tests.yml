@@ -20,8 +20,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-latest"]
-        python-version: ["3.9", "3.12"]
+        os: ["ubuntu-20.04"]
+        python-version: ["3.6", "3.12"]
       fail-fast: false
 
     env:
@@ -51,7 +51,7 @@ jobs:
 
         # `setuptools 0.64.0` adds support for editable install hooks (PEP 660).
         # https://github.com/pypa/setuptools/blob/main/CHANGES.rst#v6400
-        pip install "setuptools>=64" --upgrade
+        pip install pip setuptools --upgrade
 
         # Install package in editable mode.
         pip install --use-pep517 --prefer-binary --editable=.[test,develop]

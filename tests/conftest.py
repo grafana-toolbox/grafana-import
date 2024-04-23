@@ -1,4 +1,9 @@
-from importlib.resources import files
+import sys
+
+if sys.version_info < (3, 9):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 import pytest
 import responses
@@ -15,7 +20,10 @@ def niquests_patch_all():
     """
     from sys import modules
 
-    import niquests
+    try:
+        import niquests
+    except ImportError:
+        return
     import urllib3
 
     # Amalgamate the module namespace to make all modules aiming
@@ -32,6 +40,8 @@ def mocked_responses():
     """
     Provide the `responses` mocking machinery to a pytest environment.
     """
+    if sys.version_info < (3, 7):
+        raise pytest.skip("Does not work on Python 3.6")
     with responses.RequestsMock() as rsps:
         yield rsps
 
