@@ -1,8 +1,10 @@
+import os
 import typing as t
 
 import yaml
 
 ConfigType = t.Dict[str, t.Any]
+SettingsType = t.Dict[str, t.Union[str, int, bool]]
 
 
 def load_yaml_config(config_file: str) -> ConfigType:
@@ -26,7 +28,33 @@ def load_yaml_config(config_file: str) -> ConfigType:
         raise ValueError(f"Reading configuration file failed: {ex}") from ex
 
 
-def grafana_settings(config: ConfigType, label: str) -> t.Dict[str, t.Union[str, int, bool]]:
+def grafana_settings(
+        url: t.Union[str, None],
+        config: t.Union[ConfigType, None],
+        label: t.Union[str, None]) -> SettingsType:
+    """
+    Acquire Grafana connection profile settings, and application settings.
+    """
+
+    params: SettingsType
+
+    # Grafana connectivity.
+    if url or "GRAFANA_URL" in os.environ:
+       params = {"url": url or os.environ["GRAFANA_URL"]}
+       if "GRAFANA_TOKEN" in os.environ:
+           params.update({"token": os.environ["GRAFANA_TOKEN"]})
+    elif config is not None:
+       params = grafana_settings_from_config_section(config=config, label=label)
+
+       # Additional application parameters.
+       params.update({
+          "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
+          "folder": config.get("general", {}).get("grafana_folder", "General"),
+       })
+    return params
+
+
+def grafana_settings_from_config_section(config: ConfigType, label: t.Union[str, None]) -> SettingsType:
     """
     Extract Grafana connection profile from configuration dictionary, by label.
 
@@ -34,15 +62,15 @@ def grafana_settings(config: ConfigType, label: str) -> t.Dict[str, t.Union[str,
     section. In order to address a specific profile, this function accepts a
     `label` string.
     """
-    if not label or label not in config["grafana"]:
+    if not label or not config.get("grafana", {}).get(label):
         raise ValueError(f"Invalid Grafana configuration label: {label}")
 
-    # ** init default conf from grafana with set label.
+    # Initialize default configuration from Grafana by label.
     # FIXME: That is certainly a code smell.
     #        Q: Has it been introduced later in order to support multiple connection profiles?
+    #        Q: Is it needed to update the original `config` dict, or can it just be omitted?
     config["grafana"] = config["grafana"][label]
 
-    # ************
     if "token" not in config["grafana"]:
         raise ValueError(f"Authentication token missing in Grafana configuration at: {label}")
 
@@ -52,7 +80,6 @@ def grafana_settings(config: ConfigType, label: str) -> t.Dict[str, t.Union[str,
         "port": config["grafana"].get("port", "3000"),
         "token": config["grafana"].get("token"),
         "verify_ssl": config["grafana"].get("verify_ssl", True),
-        "search_api_limit": config["grafana"].get("search_api_limit", 5000),
-        "folder": config["general"].get("grafana_folder", "General"),
     }
+
     return params

@@ -2,6 +2,11 @@
 
 # History
 
+## Unreleased
+* Permit invocation without configuration file for ad hoc operations.
+  In this mode, the Grafana URL can optionally be defined using the
+  environment variable `GRAFANA_URL`.
+
 ## 0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client
   

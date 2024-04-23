@@ -1,9 +1,6 @@
+import os
 import sys
-
-if sys.version_info < (3, 9):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
+import typing as t
 
 import pytest
 import responses
@@ -11,6 +8,12 @@ import responses
 from grafana_import.grafana import Grafana
 from grafana_import.util import grafana_settings, load_yaml_config
 from tests.util import mock_grafana_health, mock_grafana_search
+
+
+if sys.version_info < (3, 9):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -33,6 +36,15 @@ def niquests_patch_all():
     modules["requests.sessions"] = niquests.sessions
     modules["requests.exceptions"] = niquests.exceptions
     modules["requests.packages.urllib3"] = urllib3
+
+
+@pytest.fixture(scope="session", autouse=True)
+def reset_environment():
+    """
+    Make sure relevant environment variables do not leak into the test suite.
+    """
+    if "GRAFANA_URL" in os.environ:
+        del os.environ["GRAFANA_URL"]
 
 
 @pytest.fixture
@@ -60,7 +72,7 @@ def config():
 
 @pytest.fixture
 def settings(config):
-    return grafana_settings(config, label="default")
+    return grafana_settings(url=None, config=config, label="default")
 
 
 @pytest.fixture(autouse=True)
@@ -70,5 +82,10 @@ def reset_grafana_importer():
 
 
 @pytest.fixture
-def gio(settings) -> Grafana:
-    return Grafana(**settings)
+def gio_factory(settings) -> t.Callable:
+    def mkgrafana(use_settings: bool = True) -> Grafana:
+        if use_settings:
+            return Grafana(**settings)
+        else:
+            return Grafana(url="http://localhost:3000")
+    return mkgrafana

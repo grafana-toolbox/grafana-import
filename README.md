@@ -21,10 +21,63 @@ Currently, there is no up-to-date version on PyPI, so we recommend to
 install directly from the repository.
 
 
-## Configuration
+## Ad Hoc Usage
 
-The configuration is stored in a YAML file. In order to connect to Grafana, you
-will need an authentication token for Grafana.
+You can use `grafana-import` in ad hoc mode without a configuration file.
+
+### Getting started
+
+In order to do some orientation flights, start a Grafana instance using Podman
+or Docker.
+```shell
+docker run --rm -it --name=grafana --publish=3000:3000 \
+  --env='GF_SECURITY_ADMIN_PASSWORD=admin' grafana/grafana:latest
+```
+
+Define Grafana endpoint.
+```shell
+export GRAFANA_URL=http://admin:admin@localhost:3000
+```
+
+### Import
+Import a dashboard from a JSON file into the `Applications` folder in Grafana.
+```shell
+grafana-import import -i grafana-dashboard.json -f Applications -o
+```
+Please note the import action preserves the version history.
+
+### Export
+Export the dashboard titled `my-first-dashboard` to the default export directory.
+```bash
+grafana-import export -d "my-first-dashboard" --pretty
+```
+
+### Delete
+Delete the dashboard titled `my-first-dashboard` from folder `Applications`.
+```bash
+grafana-import remove -f Applications -d "my-first-dashboard"
+```
+
+
+## Usage with Configuration File
+
+You can also use `grafana-import` with a configuration file. In this way, you
+can manage and use different Grafana connection profiles, and also use presets
+for application-wide configuration settings.
+
+The configuration is stored in a YAML file. In order to use it optimally,
+build a directory structure like this:
+```
+grafana-import/
+- conf/grafana-import.yml
+  Path to your main configuration file.
+- exports/
+  Path where exported dashboards will be stored.
+- imports/
+  Path where dashboards are imported from.
+```
+
+Then, enter into your directory, and type in your commands.
 
 The configuration file uses two sections, `general`, and `grafana`.
 
@@ -71,19 +124,22 @@ server URL.
 </details>
 
 
-## Usage
+## Authentication
 
-build a directory structure:
-- grafana-import/
-	- conf/grafana-import.yml
-	where your main configuration file is
-	- exports/
-	where your exported dashboards will be stored.
-	- imports/
-	where your dashboards to import are stored.
+In order to connect to Grafana, you can use either vanilla credentials
+(username/password), or an authentication token. Because `grafana-import`
+uses `grafana-client`, the same features for defining authentication
+settings can be used. See also [grafana-client authentication variants].
 
-Then, enter into your directory, and type in your commands.
-Please note the import action preserves the version history.
+Vanilla credentials can be embedded into the Grafana URL, to be supplied
+using the `--grafana_url` command line argument, or the `GRAFANA_URL`
+environment variable. For specifying a Grafana authentication token without
+using a configuration file, use the `GRAFANA_TOKEN` environment variable.
+
+[grafana-client authentication variants]: https://github.com/panodata/grafana-client/#authentication
+
+
+## Help
 
 `grafana-import --help`
 ```shell
@@ -117,6 +173,8 @@ optional arguments:
                         path to config files.
   -d DASHBOARD_NAME, --dashboard_name DASHBOARD_NAME
                         name of dashboard to export.
+  -u GRAFANA_URL, --grafana_url GRAFANA_URL
+                        Grafana URL to connect to.
   -g GRAFANA_LABEL, --grafana_label GRAFANA_LABEL
                         label in the config file that represents the grafana to
                         connect to.
@@ -131,27 +189,6 @@ optional arguments:
   -v, --verbose         verbose mode; display log message to stdout.
   -V, --version         display program version and exit..
 
-```
-
-
-## Examples
-
-### Import
-Import a dashboard from a JSON file to the folder `Applications` in Grafana.
-```shell
-grafana-import  -i my-first-dashboard_202104011548.json -f Applications -o
-```
-
-### Export
-Export the dashboard `my-first-dashboard` to the default export directory.
-```bash
-grafana-import -d "my-first-dashboard" -p export
-```
-
-### Delete
-Delete the dashboard `my-first-dashboard` from folder `Applications`.
-```bash
-grafana-import -f Applications -d "my-first-dashboard" remove
 ```
 
 
