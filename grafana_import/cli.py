@@ -262,10 +262,10 @@ def main():
          sys.exit(0)
       except Grafana.GrafanaDashboardNotFoundError as exp:
          print(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
-         sys.exit(0)
+         sys.exit(1)
       except Grafana.GrafanaFolderNotFoundError as exp:
          print(f"KO: Folder not found: {exp.folder}")
-         sys.exit(0)
+         sys.exit(1)
       except GrafanaApi.GrafanaBadInputError as exp:
          print(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
          sys.exit(1)
