@@ -104,6 +104,10 @@ def main():
    parser.add_argument('-d', '--dashboard_name'
 			, help='name of dashboard to export.')
 
+   parser.add_argument('-u', '--grafana_url'
+                       , help='Grafana URL to connect to.'
+                       , required=False)
+
    parser.add_argument('-g', '--grafana_label'
 			, help='label in the config file that represents the grafana to connect to.'
          , default='default')
@@ -148,14 +152,15 @@ def main():
    if args.base_path is not None:
       base_path = inArgs.base_path
 
-   config_file = os.path.join(base_path, CONFIG_NAME)
-   if args.config_file is not None:
+   if args.config_file is None:
+      config = {"general": {"debug": False}}
+   else:
+      config_file = os.path.join(base_path, CONFIG_NAME)
       if not re.search(r'^(\.|\/)?/', config_file):
          config_file = os.path.join(base_path,args.config_file)
       else:
          config_file = args.config_file
-
-   config = load_yaml_config(config_file)
+      config = load_yaml_config(config_file)
 
    if args.verbose is None:
       if 'debug' in config['general']:
@@ -192,7 +197,7 @@ def main():
    if 'export_suffix' not in config['general'] or config['general']['export_suffix'] is None:
       config['general']['export_suffix'] = "_%Y%m%d%H%M%S"
 
-   params = grafana_settings(config=config, label=args.grafana_label)
+   params = grafana_settings(url=args.grafana_url, config=config, label=args.grafana_label)
    params.update({
          'overwrite': args.overwrite,
          'allow_new': args.allow_new,

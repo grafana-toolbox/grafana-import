@@ -66,18 +66,29 @@ class Grafana(object):
    dashboards: t.List[t.Any] = []
 
    #***********************************************
-   def __init__( *args, **kwargs ):
-      self = args[0]
+   def __init__(self, **kwargs ):
 
-      config = { }
-      config['protocol'] = kwargs.get('protocol', 'http')
-      config['host'] = kwargs.get('host', 'localhost')
-      config['port'] = kwargs.get('port', 3000)
-      config['token'] = kwargs.get('token', None)
-      if config['token'] is None:
-         raise GrafanaClient.GrafanaBadInputError('grafana token is not defined')
+      # Configure Grafana connectivity.
+      if "url" in kwargs:
+         self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
+      else:
+         config = {}
+         config['protocol'] = kwargs.get('protocol', 'http')
+         config['host'] = kwargs.get('host', 'localhost')
+         config['port'] = kwargs.get('port', 3000)
+         config['token'] = kwargs.get('token', None)
+         if config['token'] is None:
+            raise GrafanaClient.GrafanaBadInputError('Grafana authentication token missing')
 
-      config['verify_ssl'] = kwargs.get('verify_ssl', True)
+         config['verify_ssl'] = kwargs.get('verify_ssl', True)
+
+         self.grafana_api = GrafanaApi.GrafanaApi(
+            auth=config['token'],
+            host=config['host'],
+            protocol=config['protocol'],
+            port=config['port'],
+            verify=config['verify_ssl'],
+         )
 
       self.search_api_limit = kwargs.get('search_api_limit', 5000)
       #* set the default destination folder for dash
@@ -90,14 +101,6 @@ class Grafana(object):
       #* allow to create new dashboard with same name in specified folder.
       self.allow_new = kwargs.get('allow_new', False)
 
-      #* build an aapi object
-      self.grafana_api = GrafanaApi.GrafanaApi(
-         auth=config['token'],
-         host=config['host'],
-         protocol=config['protocol'],
-         port=config['port'],
-         verify=config['verify_ssl'],
-      )
       #* try to connect to the API
       try:
          res = self.grafana_api.health.check()
