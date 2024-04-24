@@ -25,7 +25,7 @@ from datetime import datetime
 import grafana_client.client as GrafanaApi
 import grafana_import.grafana as Grafana
 
-from grafana_import.util import load_yaml_config, grafana_settings
+from grafana_import.util import load_yaml_config, grafana_settings, read_dashboard_file
 
 #******************************************************************************************
 config = None
@@ -214,27 +214,20 @@ def main():
       if args.dashboard_file is None:
          print('ERROR: no file to import provided!')
          sys.exit(1)
+
+      # Compute effective input file path.
       import_path = ''
       import_file = args.dashboard_file
       if not re.search(r'^(?:(?:/)|(?:\.?\./))', import_file):
          import_path = base_path
          if 'imports_path' in config['general']:
             import_path = os.path.join(import_path, config['general']['imports_path'] )
-      import_path = os.path.join(import_path, import_file)
+      import_file = os.path.join(import_path, import_file)
 
       try:
-         input = open(import_path, 'r')
-      except OSError as e:
-         print('ERROR: File {0} error: {1}.'.format(import_path, e.strerror))
-         sys.exit(1)
-
-      data = input.read()
-      input.close()
-
-      try:
-         dash = json.loads(data)
-      except json.JSONDecodeError as e:
-         print("ERROR: reading '{0}': {1}".format(import_path, e))
+         dash = read_dashboard_file(import_file)
+      except Exception as ex:
+         print(f"ERROR: Failed to import dashboard from: {import_file}. Reason: {ex}")
          sys.exit(1)
 
       try:

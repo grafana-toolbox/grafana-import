@@ -8,6 +8,8 @@
   environment variable `GRAFANA_URL`.
 * Fix exit codes in failure situations.
 * Fix exception handling and propagation in failure situations.
+* Add feature to support dashboard builders, in the spirit of
+  dashboard-as-code.
 
 ## 0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client
