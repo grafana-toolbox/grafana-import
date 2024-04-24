@@ -7,8 +7,8 @@ After invoking `poe check`, and observing the software tests succeed, you
 should be ready to start hacking.
 
 ```shell
-git clone https://github.com/peekjef72/grafana-import-tool
-cd grafana-import-tool
+git clone https://github.com/grafana-toolbox/grafana-import
+cd grafana-import
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --editable='.[develop,test]'
