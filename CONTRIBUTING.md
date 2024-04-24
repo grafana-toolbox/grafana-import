@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at https://github.com/peekjef72/grafana-import-tool/issues.
+Report bugs at https://github.com/grafana-toolbox/grafana-import/issues.
 
 If you are reporting a bug, please include:
 
@@ -35,7 +35,7 @@ articles, and such.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at https://github.com/peekjef72/grafana-import-tool/issues
+The best way to send feedback is to file an issue at https://github.com/grafana-toolbox/grafana-import/issues
 
 If you are proposing a feature:
 
@@ -49,13 +49,13 @@ If you are proposing a feature:
 Ready to contribute? Here's how to set up `grafana-import` for
 local development.
 
-1. _Fork_ the `grafana-import-tool` repo on GitHub.
+1. _Fork_ the `grafana-import` repo on GitHub.
 
- [Fork](https://github.com/peekjef72/grafana-import-tool/fork)
+ [Fork](https://github.com/grafana-toolbox/grafana-import/fork)
 
 2. Clone your fork locally:
 
-    $ git clone git@github.com:your_name_here/grafana-import-tool.git
+    $ git clone git@github.com:your_name_here/grafana-import.git
 
 3. Create a branch for local development:
 
@@ -64,7 +64,7 @@ local development.
 Now you can make your changes locally.
 
 4. When you're done making changes, check that your changes pass style and unit
-   tests, including testing other Python versions with grafana-import-tool
+   tests, including testing other Python versions with grafana-import
 
     $ grafana-import
 

@@ -11,14 +11,15 @@ _Export and import Grafana dashboards using the [Grafana HTTP API] and
   emitted by dashboard builders, supporting dashboard-as-code workflows.
   - The import action preserves the version history of dashboards.
   - Supported builders are [grafana-dashboard], [grafanalib], and
-    any other program emitting valid Grafana Dashboard JSON on STDOUT.
+    any other executable program which emits Grafana Dashboard JSON
+    on STDOUT.
 - Remove dashboards.
 
 
 ## Installation
 
 ```shell
-pip install --upgrade 'git+https://github.com/peekjef72/grafana-import-tool.git'
+pip install --upgrade 'grafana-import[builder] git+https://github.com/grafana-toolbox/grafana-import.git'
 ```
 
 Currently, there is no up-to-date version on PyPI, so we recommend to

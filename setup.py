@@ -48,7 +48,7 @@ setup(
     license="Apache 2.0",
     author="Jean-Francois Pik",
     author_email="jfpik78@gmail.com",
-    url="https://github.com/peekjef72/grafana-import-tool",
+    url="https://github.com/grafana-toolbox/grafana-import",
     entry_points={
         'console_scripts': [
             'grafana-import = grafana_import.cli:main'
