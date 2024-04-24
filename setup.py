@@ -12,6 +12,10 @@ requires = [
 ]
 
 extras = {
+    "builder": [
+        "grafana-dashboard==0.1.1",
+        "grafanalib==0.7.1",
+    ],
     "develop": [
         "black<25",
         "mypy<1.10",

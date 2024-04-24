@@ -1,5 +1,10 @@
+import json
 import os
+import shlex
+import subprocess
+import sys
 import typing as t
+from pathlib import Path
 
 import yaml
 
@@ -83,3 +88,42 @@ def grafana_settings_from_config_section(config: ConfigType, label: t.Union[str,
     }
 
     return params
+
+
+def file_is_executable(path: t.Union[str, Path]):
+    """
+    Is this file executable?
+
+    https://bugs.python.org/issue42497
+    """
+    return os.access(str(path), os.X_OK)
+
+
+def read_dashboard_file(path: t.Union[str, Path]) -> t.Dict[str, t.Any]:
+    """
+    Read dashboard file, and return its representation.
+    """
+
+    path = Path(path)
+
+    if path.suffix == ".json":
+        try:
+            with open(path, 'r') as f:
+                payload = f.read()
+        except OSError as ex:
+            raise IOError(f"Reading file failed: {path}. Reason: {ex.strerror}") from ex
+
+    elif path.suffix == ".py":
+        command = f"{sys.executable} {path}"
+        payload = subprocess.check_output(shlex.split(command), encoding="utf-8")  # noqa: S603
+
+    elif file_is_executable(path):
+        payload = subprocess.check_output([path], shell=True, encoding="utf-8")  # noqa: S602, S603
+
+    else:
+        raise NotImplementedError(f"Decoding file type not implemented, or file is not executable: {path.name}")
+
+    try:
+        return json.loads(payload)
+    except json.JSONDecodeError as ex:
+        raise IOError(f"Decoding JSON output from file failed: {path}. Reason: {ex}") from ex

@@ -6,8 +6,12 @@ _Export and import Grafana dashboards using the [Grafana HTTP API] and
 
 ## Features
 
-- Export Grafana dashboards into JSON format.
-- Import dashboards in JSON format into Grafana.
+- Export dashboards into JSON format.
+- Import dashboards into Grafana, both in native JSON format, or
+  emitted by dashboard builders, supporting dashboard-as-code workflows.
+  - The import action preserves the version history of dashboards.
+  - Supported builders are [grafana-dashboard], [grafanalib], and
+    any other program emitting valid Grafana Dashboard JSON on STDOUT.
 - Remove dashboards.
 
 
@@ -18,7 +22,9 @@ pip install --upgrade 'git+https://github.com/peekjef72/grafana-import-tool.git'
 ```
 
 Currently, there is no up-to-date version on PyPI, so we recommend to
-install directly from the repository.
+install directly from the repository. The command outlined above describes
+a full installation of `grafana-import`, including support for dashboard
+builders, aka. dashboard-as-code.
 
 
 ## Ad Hoc Usage
@@ -34,22 +40,36 @@ docker run --rm -it --name=grafana --publish=3000:3000 \
   --env='GF_SECURITY_ADMIN_PASSWORD=admin' grafana/grafana:latest
 ```
 
+If you don't have any Grafana dashboard representations at hand, you can
+acquire some from the `examples` directory within the `grafana-import`
+repository, like this.
+```shell
+wget https://github.com/grafana-toolbox/grafana-snippets/raw/main/dashboard/native-play-influxdb.json
+wget https://github.com/grafana-toolbox/grafana-snippets/raw/main/dashboard/gd-prometheus.py
+```
+
 Define Grafana endpoint.
 ```shell
 export GRAFANA_URL=http://admin:admin@localhost:3000
 ```
 
-### Import
-Import a dashboard from a JSON file into the `Applications` folder in Grafana.
+### Import from JSON
+Import a dashboard from a JSON file.
 ```shell
-grafana-import import -i grafana-dashboard.json -f Applications -o
+grafana-import import -i native-play-influxdb.json
 ```
-Please note the import action preserves the version history.
+
+### Import using a builder
+Import a dashboard emitted by a dashboard builder, overwriting it
+when a dashboard with the same name already exists in the same folder.
+```shell
+grafana-import import --overwrite -i gd-prometheus.py
+```
 
 ### Export
 Export the dashboard titled `my-first-dashboard` to the default export directory.
 ```bash
-grafana-import export -d "my-first-dashboard" --pretty
+grafana-import export --pretty -d "my-first-dashboard"
 ```
 
 ### Delete
@@ -205,3 +225,5 @@ learn how to set up a [development sandbox].
 [development sandbox]: ./docs/sandbox.md
 [Grafana HTTP API]: https://grafana.com/docs/grafana/latest/http_api/
 [grafana-client]: https://github.com/panodata/grafana-client
+[grafana-dashboard]: https://github.com/fzyzcjy/grafana_dashboard_python
+[grafanalib]: https://github.com/weaveworks/grafanalib
