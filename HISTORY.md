@@ -9,7 +9,9 @@
 * Fix exit codes in failure situations.
 * Fix exception handling and propagation in failure situations.
 * Add feature to support dashboard builders, in the spirit of
-  dashboard-as-code.
+  dashboard-as-code. Supports Grafonnet, grafana-dashboard, grafanalib,
+  and any other kind of executable program generating Grafana Dashboard
+  JSON.
 * Add watchdog feature, monitoring the input dashboard for changes on
   disk, and re-uploading it, when changed.
 
