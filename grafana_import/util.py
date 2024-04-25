@@ -119,6 +119,11 @@ def read_dashboard_file(path: t.Union[str, Path]) -> t.Dict[str, t.Any]:
         except OSError as ex:
             raise IOError(f"Reading file failed: {path}. Reason: {ex.strerror}") from ex
 
+    elif path.suffix == ".jsonnet":
+        # jsonnet --jpath vendor faro.jsonnet
+        command = f"jsonnet --jpath {path.parent / 'vendor'} {path}"
+        payload = subprocess.check_output(shlex.split(command), encoding="utf-8")  # noqa: S603
+
     elif path.suffix == ".py":
         command = f"{sys.executable} {path}"
         payload = subprocess.check_output(shlex.split(command), encoding="utf-8")  # noqa: S603
