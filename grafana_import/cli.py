@@ -9,6 +9,9 @@ Suivi des modifications :
     V 0.0.0 - 2021/03/15 - JF. PIK - initial version
 
 """
+import logging
+from pathlib import Path
+
 #***********************************************************************************************
 #
 #
@@ -24,8 +27,9 @@ from datetime import datetime
 
 import grafana_client.client as GrafanaApi
 import grafana_import.grafana as Grafana
+from grafana_import.service import watchdog_service
 
-from grafana_import.util import load_yaml_config, grafana_settings, read_dashboard_file
+from grafana_import.util import load_yaml_config, grafana_settings, read_dashboard_file, setup_logging
 
 #******************************************************************************************
 config = None
@@ -83,9 +87,15 @@ class myArgs:
            obj[attr] = val
     return json.dumps(obj)
 
+
+logger = logging.getLogger(__name__)
+
  
 #***********************************************************************************************
 def main():
+
+   setup_logging()
+
    #******************************************************************
    # get command line arguments
 
@@ -122,6 +132,11 @@ def main():
 			, action='store_true'
          , default=False
 			, help='if a dashboard with same name exists in same folder, overwrite it with this new one.')
+
+   parser.add_argument('-r', '--reload'
+                       , action='store_true'
+                       , default=False
+                       , help='Watch the input dashboard for changes on disk, and re-upload it, when changed.')
 
    parser.add_argument('-p', '--pretty'
 			, action='store_true'
@@ -224,27 +239,40 @@ def main():
             import_path = os.path.join(import_path, config['general']['imports_path'] )
       import_file = os.path.join(import_path, import_file)
 
-      try:
-         dash = read_dashboard_file(import_file)
-      except Exception as ex:
-         print(f"ERROR: Failed to import dashboard from: {import_file}. Reason: {ex}")
-         sys.exit(1)
+      def process_dashboard():
+         try:
+            dash = read_dashboard_file(import_file)
+         except Exception as ex:
+            msg = f"Failed to load dashboard from: {import_file}. Reason: {ex}"
+            logger.exception(msg)
+            raise IOError(msg)
+
+         try:
+            res = grafana_api.import_dashboard( dash )
+         except GrafanaApi.GrafanaClientError as ex:
+            msg = f"Failed to upload dashboard to Grafana. Reason: {ex}"
+            logger.exception(msg)
+            raise IOError(msg)
+
+         title = dash['title']
+         folder_name = grafana_api.grafana_folder
+         if res:
+            logger.info(f"Dashboard '{title}' imported into folder '{folder_name}'")
+         else:
+            msg = f"Failed to import dashboard into Grafana. title={title}, folder={folder_name}"
+            logger.error(msg)
+            raise IOError(msg)
 
       try:
-         res = grafana_api.import_dashboard( dash )
-      except GrafanaApi.GrafanaClientError as exp:
-         print('ERROR: {0}.'.format(exp))
-         print("maybe you want to set --overwrite option.")
+         process_dashboard()
+      except:
          sys.exit(1)
 
-      title = dash['title']
-      folder_name = grafana_api.grafana_folder
-      if res:
-         print(f"OK: Dashboard '{title}' imported into folder '{folder_name}'")
-         sys.exit(0)
-      else:
-         print(f"KO: Dashboard '{title}' not imported into folder '{folder_name}'")
-         sys.exit(1)
+      if args.reload:
+         watchdog_service(import_file, process_dashboard)
+
+      sys.exit(0)
+
 
    #*******************************************************************************
    elif args.action == 'remove':

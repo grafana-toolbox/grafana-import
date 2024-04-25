@@ -21,7 +21,7 @@ def get_settings_arg(use_settings: bool = True):
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
-def test_import_dashboard_success(mocked_grafana, mocked_responses, tmp_path, capsys, use_settings):
+def test_import_dashboard_success(mocked_grafana, mocked_responses, tmp_path, caplog, use_settings):
     """
     Verify "import dashboard" works.
     """
@@ -42,8 +42,7 @@ def test_import_dashboard_success(mocked_grafana, mocked_responses, tmp_path, ca
         main()
     assert ex.match("0")
 
-    out, err = capsys.readouterr()
-    assert "OK: Dashboard 'Dashboard One' imported into folder 'General'" in out
+    assert "Dashboard 'Dashboard One' imported into folder 'General'" in caplog.messages
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])

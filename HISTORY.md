@@ -10,6 +10,8 @@
 * Fix exception handling and propagation in failure situations.
 * Add feature to support dashboard builders, in the spirit of
   dashboard-as-code.
+* Add watchdog feature, monitoring the input dashboard for changes on
+  disk, and re-uploading it, when changed.
 
 ## 0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client

@@ -9,6 +9,7 @@ requires = [
     'grafana-client<5',
     'jinja2<4',
     'pyyaml<7',
+    'watchdog<5',
 ]
 
 extras = {
