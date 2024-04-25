@@ -13,6 +13,9 @@ _Export and import Grafana dashboards using the [Grafana HTTP API] and
   - Supported builders are [grafana-dashboard], [grafanalib], and
     any other executable program which emits Grafana Dashboard JSON
     on STDOUT.
+- Watchdog: For a maximum of authoring and editing efficiency, the
+  watchdog monitors the input dashboard for changes on disk, and
+  re-uploads it to the Grafana API, when changed.
 - Remove dashboards.
 
 
@@ -65,6 +68,12 @@ Import a dashboard emitted by a dashboard builder, overwriting it
 when a dashboard with the same name already exists in the same folder.
 ```shell
 grafana-import import --overwrite -i gd-prometheus.py
+```
+
+### Import using reloading
+Watch the input dashboard for changes on disk, and re-upload it, when changed.
+```shell
+grafana-import import --overwrite --reload -i gd-prometheus.py
 ```
 
 ### Export
@@ -205,10 +214,12 @@ optional arguments:
                         path to the dashboard file to import into Grafana.
   -o, --overwrite       if a dashboard with same name exists in folder,
                         overwrite it with this new one.
+  -r, --reload          Watch the input dashboard for changes on disk, and
+                        re-upload it, when changed.
   -p, --pretty          use JSON indentation when exporting or extraction of
                         dashboards.
   -v, --verbose         verbose mode; display log message to stdout.
-  -V, --version         display program version and exit..
+  -V, --version         display program version and exit.
 
 ```
 

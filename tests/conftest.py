@@ -9,7 +9,6 @@ from grafana_import.grafana import Grafana
 from grafana_import.util import grafana_settings, load_yaml_config
 from tests.util import mock_grafana_health, mock_grafana_search
 
-
 if sys.version_info < (3, 9):
     from importlib_resources import files
 else:
