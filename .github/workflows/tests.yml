@@ -56,9 +56,14 @@ jobs:
         # Install package in editable mode.
         pip install --use-pep517 --prefer-binary --editable=.[test,develop]
 
-    - name: Run linter and software tests
+    - name: Check code style
+      if: matrix.python-version != '3.6' && matrix.python-version != '3.7'
       run: |
-        poe check
+        poe lint
+
+    - name: Run software tests
+      run: |
+        poe test
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

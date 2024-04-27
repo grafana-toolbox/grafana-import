@@ -40,9 +40,8 @@ def load_yaml_config(config_file: str) -> ConfigType:
 
 
 def grafana_settings(
-        url: t.Union[str, None],
-        config: t.Union[ConfigType, None],
-        label: t.Union[str, None]) -> SettingsType:
+    url: t.Union[str, None], config: t.Union[ConfigType, None], label: t.Union[str, None]
+) -> SettingsType:
     """
     Acquire Grafana connection profile settings, and application settings.
     """
@@ -51,17 +50,19 @@ def grafana_settings(
 
     # Grafana connectivity.
     if url or "GRAFANA_URL" in os.environ:
-       params = {"url": url or os.environ["GRAFANA_URL"]}
-       if "GRAFANA_TOKEN" in os.environ:
-           params.update({"token": os.environ["GRAFANA_TOKEN"]})
+        params = {"url": url or os.environ["GRAFANA_URL"]}
+        if "GRAFANA_TOKEN" in os.environ:
+            params.update({"token": os.environ["GRAFANA_TOKEN"]})
     elif config is not None:
-       params = grafana_settings_from_config_section(config=config, label=label)
+        params = grafana_settings_from_config_section(config=config, label=label)
 
-       # Additional application parameters.
-       params.update({
-          "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
-          "folder": config.get("general", {}).get("grafana_folder", "General"),
-       })
+        # Additional application parameters.
+        params.update(
+            {
+                "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
+                "folder": config.get("general", {}).get("grafana_folder", "General"),
+            }
+        )
     return params
 
 
@@ -85,7 +86,7 @@ def grafana_settings_from_config_section(config: ConfigType, label: t.Union[str,
     if "token" not in config["grafana"]:
         raise ValueError(f"Authentication token missing in Grafana configuration at: {label}")
 
-    params = {
+    return {
         "host": config["grafana"].get("host", "localhost"),
         "protocol": config["grafana"].get("protocol", "http"),
         "port": config["grafana"].get("port", "3000"),
@@ -93,10 +94,8 @@ def grafana_settings_from_config_section(config: ConfigType, label: t.Union[str,
         "verify_ssl": config["grafana"].get("verify_ssl", True),
     }
 
-    return params
 
-
-def file_is_executable(path: t.Union[str, Path]):
+def file_is_executable(path: t.Union[str, Path]) -> bool:
     """
     Is this file executable?
 
@@ -114,7 +113,7 @@ def read_dashboard_file(path: t.Union[str, Path]) -> t.Dict[str, t.Any]:
 
     if path.suffix == ".json":
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 payload = f.read()
         except OSError as ex:
             raise IOError(f"Reading file failed: {path}. Reason: {ex.strerror}") from ex

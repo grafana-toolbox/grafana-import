@@ -30,7 +30,7 @@ class SingleFileModifiedHandler(PatternMatchingEventHandler):
             logger.exception(f"Processing file failed: {event.src_path}")
 
 
-def watchdog_service(path: Path, action: t.Union[t.Callable, None] = None):
+def watchdog_service(path: Path, action: t.Union[t.Callable, None] = None) -> None:
     """
     https://python-watchdog.readthedocs.io/en/stable/quickstart.html
     """

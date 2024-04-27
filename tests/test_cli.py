@@ -16,8 +16,7 @@ CONFIG_FILE = "grafana_import/conf/grafana-import.yml"
 def get_settings_arg(use_settings: bool = True):
     if use_settings:
         return f"--config_file {CONFIG_FILE}"
-    else:
-        return "--grafana_url http://localhost:3000"
+    return "--grafana_url http://localhost:3000"
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
