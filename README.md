@@ -270,6 +270,14 @@ optional arguments:
 
 ```
 
+## Prior Art
+
+- https://grafana.com/blog/2020/02/26/how-to-configure-grafana-as-code/
+- https://grafana.com/blog/2022/12/06/a-complete-guide-to-managing-grafana-as-code-tools-tips-and-tricks/
+- https://grafana.github.io/grizzly/
+  https://grafana.github.io/grizzly/what-is-grizzly/
+- https://docs.ansible.com/ansible/latest/collections/grafana/grafana/dashboard_module.html#ansible-collections-grafana-grafana-dashboard-module
+
 
 ## Contributing
 
