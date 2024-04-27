@@ -277,6 +277,10 @@ optional arguments:
 - https://grafana.github.io/grizzly/
   https://grafana.github.io/grizzly/what-is-grizzly/
 - https://docs.ansible.com/ansible/latest/collections/grafana/grafana/dashboard_module.html#ansible-collections-grafana-grafana-dashboard-module
+- https://blog.kevingomez.fr/2023/03/07/three-years-of-grafana-dashboards-as-code/
+- https://github.com/K-Phoen/grabana
+- https://github.com/K-Phoen/dark
+- https://github.com/grafana/scenes
 
 
 ## Contributing
