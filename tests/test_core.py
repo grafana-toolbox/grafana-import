@@ -77,7 +77,7 @@ def test_remove_dashboard_success(mocked_grafana, mocked_responses, settings):
 
     gio = Grafana(**settings)
     outcome = gio.remove_dashboard("foobar")
-    assert outcome is True
+    assert outcome == {"status": "ok"}
 
 
 def test_remove_dashboard_folder_not_found(mocked_responses, settings):

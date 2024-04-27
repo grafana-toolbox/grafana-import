@@ -85,6 +85,6 @@ def gio_factory(settings) -> t.Callable:
     def mkgrafana(use_settings: bool = True) -> Grafana:
         if use_settings:
             return Grafana(**settings)
-        else:
-            return Grafana(url="http://localhost:3000")
+        return Grafana(url="http://localhost:3000")
+
     return mkgrafana

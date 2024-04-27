@@ -6,10 +6,10 @@ from grafana_import.constants import PKG_NAME, PKG_VERSION
 
 # Global variables
 requires = [
-    'grafana-client<5',
-    'jinja2<4',
-    'pyyaml<7',
-    'watchdog<5',
+    "grafana-client<5",
+    "jinja2<4",
+    "pyyaml<7",
+    "watchdog<5",
 ]
 
 extras = {
@@ -43,22 +43,18 @@ README = open(os.path.join(here, "README.md")).read()
 setup(
     name=PKG_NAME,
     version=PKG_VERSION,
-    description='Export and import Grafana dashboards using the Grafana HTTP API.',
-    long_description_content_type='text/markdown',
+    description="Export and import Grafana dashboards using the Grafana HTTP API.",
+    long_description_content_type="text/markdown",
     long_description=README,
     license="Apache 2.0",
     author="Jean-Francois Pik",
     author_email="jfpik78@gmail.com",
     url="https://github.com/grafana-toolbox/grafana-import",
-    entry_points={
-        'console_scripts': [
-            'grafana-import = grafana_import.cli:main'
-        ]
-    },
+    entry_points={"console_scripts": ["grafana-import = grafana_import.cli:main"]},
     packages=find_packages(),
     install_requires=requires,
     extras_require=extras,
-    package_data={'': ['conf/*']},
+    package_data={"": ["conf/*"]},
     classifiers=[
         "Programming Language :: Python",
         "License :: OSI Approved :: Apache Software License",
@@ -95,5 +91,5 @@ setup(
         "Topic :: System :: Networking :: Monitoring",
     ],
     keywords="grafana http api grafana-client grafana-api http-client "
-             "grafana-utils grafana-automation grafana-toolbox dashboard",
+    "grafana-utils grafana-automation grafana-toolbox dashboard grafana-dashboard grafanalib grafonnet",
 )
