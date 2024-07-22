@@ -56,13 +56,13 @@ def grafana_settings(
     elif config is not None:
         params = grafana_settings_from_config_section(config=config, label=label)
 
-        # Additional application parameters.
-        params.update(
-            {
-                "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
-                "folder": config.get("general", {}).get("grafana_folder", "General"),
-            }
-        )
+    # Additional application parameters.
+    params.update(
+        {
+            "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
+            "folder": config.get("general", {}).get("grafana_folder", "General"),
+        }
+    )
     return params
 
 
