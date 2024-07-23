@@ -224,6 +224,8 @@ def main():
     try:
         grafana_api = Grafana.Grafana(**params)
     except Exception as e:
+        print("ERROR in grafana_api = Grafana.Grafana(**params)")
+        print(f"PARAMS: {params}")
         print(f"ERROR: {e}")
         sys.exit(1)
 
