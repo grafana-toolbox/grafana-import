@@ -69,7 +69,7 @@ class Grafana:
             self.grafana_api = GrafanaApi.GrafanaApi(
                 auth=kwargs.get("token", "localhost"),
                 host=kwargs.get("url", "localhost"),
-                protocol=kwargs.get("protocol", "http"),
+                protocol=kwargs.get("protocol", "https"),
                 port=kwargs.get("port", None),
                 verify=kwargs.get("verify_ssl", True),
             )
