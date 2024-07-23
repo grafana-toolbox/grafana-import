@@ -65,7 +65,14 @@ class Grafana:
 
         # Configure Grafana connectivity.
         if "url" in kwargs:
-            self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
+           # self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
+            self.grafana_api = GrafanaApi.GrafanaApi(
+                auth=kwargs.get("token", "localhost"),
+                host=kwargs.get("url", "localhost"),
+                protocol=kwargs.get("protocol", "http"),
+                port=kwargs.get("port", "3000"),
+                verify=kwargs.get("verify_ssl", True),
+            )
         else:
             config = {}
             config["protocol"] = kwargs.get("protocol", "http")
