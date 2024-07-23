@@ -70,7 +70,7 @@ class Grafana:
                 auth=kwargs.get("token", "localhost"),
                 host=kwargs.get("url", "localhost"),
                 protocol=kwargs.get("protocol", "http"),
-                port=kwargs.get("port", "3000"),
+                port=kwargs.get("port", None),
                 verify=kwargs.get("verify_ssl", True),
             )
         else:
