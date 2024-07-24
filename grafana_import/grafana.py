@@ -59,12 +59,15 @@ def remove_accents_and_space(input_str: str) -> str:
 class Grafana:
     # * to store the folders list, dashboards list (kind of cache)
     folders: t.List[t.Any] = []
-    dashboards: t.List[t.Any] = []
+    dashboards: t.List[t.Any] = []      
+    
 
     def __init__(self, **kwargs):
+        print(f"ENTER Grafana init: {kwargs}")
 
         # Configure Grafana connectivity.
         if "url" in kwargs:
+            print(f"URL in kwargs: {kwargs}")
            # self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
             self.grafana_api = GrafanaApi.GrafanaApi(
                 auth=kwargs.get("token", "localhost"),
@@ -74,6 +77,7 @@ class Grafana:
                 verify=kwargs.get("verify_ssl", True),
             )
         else:
+            print(f"Config in kwargs: {kwargs}")
             config = {}
             config["protocol"] = kwargs.get("protocol", "http")
             config["host"] = kwargs.get("host", "localhost")
@@ -112,6 +116,8 @@ class Grafana:
             raise
 
     def find_dashboard(self, dashboard_name: str) -> t.Union[t.Dict[str, t.Any], None]:
+        print(f"FIND DASHBOARD: {dashboard_name}")
+
         """
         Retrieve dashboards which name are matching the lookup named.
         Some api version didn't return folderTitle. Requires to lookup in two phases.
@@ -133,6 +139,7 @@ class Grafana:
             "title": "General",
         }
         if not re.match("general", self.grafana_folder, re.IGNORECASE):
+            print(f"FIND DASHBOARD IF FOLDER: {self.grafana_folder}")
             found_folder = self.get_folder(folder_name=self.grafana_folder)
             if found_folder is not None:
                 folder = found_folder
@@ -141,6 +148,7 @@ class Grafana:
         # * find the board uid in the list
         for cur_dash in dashboards:
             if cur_dash["title"] == dashboard_name:
+                print(f"FIND DASHBOARD IN DASHBOARDS: {dashboard_name}")
                 # set current dashbard as found candidate
                 board = cur_dash
                 # check the folder part
@@ -220,6 +228,8 @@ class Grafana:
         return res
 
     def get_folder(self, folder_name: str = None, folder_uid: str = None):
+        print(f"ENTER GET FOLDER: {folder_name}")
+
         """
         try to find folder meta data (uid...) from folder name
            params:
@@ -245,11 +255,12 @@ class Grafana:
             ):
                 folder = tmp_folder
                 break
-
+        print(f"FOUND FOLDER: {folder_name}")        
         return folder
 
     def import_dashboard(self, dashboard: t.Dict[str, t.Any]) -> bool:
-
+        print("ENTER IMPORT DASHBOARD")
+        
         # ** build a temporary meta dashboard struct to store info
         # ** by default dashboard will be overwritten
         new_dash: t.Dict[str, t.Any] = {
@@ -270,6 +281,8 @@ class Grafana:
         else:
             # ** check 'custom' folder existence (custom != General)
             folder = self.get_folder(self.grafana_folder)
+            print(f"IMPORT DASH - GET FOLDER: {folder}")
+
             if folder is None:
                 folder = self.grafana_api.folder.create_folder(self.grafana_folder)
 
@@ -332,4 +345,5 @@ class Grafana:
         else:
             res = False
 
+        print(f"IMPORT DASH RESULT: {res}")
         return res
