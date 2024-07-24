@@ -244,7 +244,9 @@ class Grafana:
 
         # * init cache for folders.
         if len(Grafana.folders) == 0:
+            print(f"BEFORE GET FOLDERS: {folder_name}")
             res = self.grafana_api.folder.get_all_folders()
+            print(f"GET FOLDERS RESULT: {res}")
             Grafana.folders = res
 
         folders = Grafana.folders
