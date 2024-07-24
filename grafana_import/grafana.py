@@ -70,7 +70,7 @@ class Grafana:
             print(f"URL in kwargs: {kwargs}")
            # self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
             self.grafana_api = GrafanaApi.GrafanaApi(
-                auth=kwargs.get("token", "localhost"),
+                auth=kwargs.get("token", None),
                 host=kwargs.get("url", "localhost"),
                 protocol=kwargs.get("protocol", "https"),
                 port=kwargs.get("port", None),
@@ -109,7 +109,9 @@ class Grafana:
 
         # * try to connect to the API
         try:
+            print("Grafana Health check Start")
             res = self.grafana_api.health.check()
+            print(f"Grafana Health check result: {res}")
             if res["database"] != "ok":
                 raise Exception("grafana is not UP")
         except:
