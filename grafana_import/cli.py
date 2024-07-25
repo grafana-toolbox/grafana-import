@@ -26,13 +26,13 @@ from grafana_import.util import grafana_settings, load_yaml_config, read_dashboa
 
 config = None
 
+
 def setup_logging(level=logging.INFO, verbose: bool = False):
     log_format = "%(asctime)-15s [%(name)-26s] %(levelname)-8s: %(message)s"
     logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
 
 
 def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
-
     output_file = base_path
     file_name = dashboard_name
 
@@ -94,7 +94,6 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-
     setup_logging()
 
     # Get command line arguments.
@@ -106,7 +105,7 @@ def main():
         action="store_true",
         default=False,
         help="If a dashboard with same name exists in an another folder, "
-        "allow to create a new dashboard with same name it that folder.",
+             "allow to create a new dashboard with same name it that folder.",
     )
 
     parser.add_argument("-b", "--base_path", help="set base directory to find default files.")
@@ -164,9 +163,9 @@ def main():
         choices=["import", "export", "remove"],
         default="import",
         help="action to perform. Is one of 'export', 'import' (default), or 'remove'.\n"
-        "export: lookup for dashboard name in Grafana and dump it to local file.\n"
-        "import: import a local dashboard file (previously exported) to Grafana.\n"
-        "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
+             "export: lookup for dashboard name in Grafana and dump it to local file.\n"
+             "import: import a local dashboard file (previously exported) to Grafana.\n"
+             "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
     )
     inArgs = myArgs()
     args = parser.parse_args(namespace=inArgs)
@@ -204,7 +203,7 @@ def main():
         config["general"]["dashboard_name"] = args.dashboard_name
 
     if args.action == "exporter" and (
-        "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
+            "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
         sys.exit(1)
@@ -240,30 +239,30 @@ def main():
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
-        import_files = []             
+        import_files = []
 
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
-            import_files.append(import_file)    
+            import_files.append(import_file)
 
-        if os.path.isfile(import_file):        
+        if os.path.isfile(import_file):
             logger.info(f"The path is a file: '{import_file}'")
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
 
         if os.path.isdir(import_file):
             logger.info(f"The path is a directory: '{import_file}'")
-            import_files = [os.path.join(import_file, f) for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))] 
+            import_files = [os.path.join(import_file, f) for f in os.listdir(import_file) if
+                            os.path.isfile(os.path.join(import_file, f))]
             logger.info(f"Found the following files: '{import_files}' in dir '{import_file}'")
 
-
-        def process_dashboard(file):
+        def process_dashboard(file_path):
             try:
-                dash = read_dashboard_file(file)
+                dash = read_dashboard_file(file_path)
             except Exception as ex:
-                msg = f"Failed to load dashboard from: {file}. Reason: {ex}"
+                msg = f"Failed to load dashboard from: {file_path}. Reason: {ex}"
                 logger.exception(msg)
                 raise IOError(msg) from ex
 
@@ -284,10 +283,12 @@ def main():
                 raise IOError(msg)
 
         for (file) in import_files:
-           # try:
-            process_dashboard(file)
-           # except Exception:
-           #     sys.exit(1)
+            try:
+                process_dashboard(file)
+            except Exception:
+                logger.error(f"Failed to process file {file}. Reason: {str(e)}")
+                continue
+                # sys.exit(1)
 
         if args.reload:
             for (file) in import_files:
