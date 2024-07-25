@@ -252,6 +252,7 @@ def main():
 
 
         def process_dashboard(file):
+            print(f"FILE in DASHBOARD: {file}")
             try:
                 dash = read_dashboard_file(file)
             except Exception as ex:
@@ -276,6 +277,7 @@ def main():
                 raise IOError(msg)
 
         for (file) in import_files:
+            print(f"FILE: {file}")
             try:
                 process_dashboard(file)
             except Exception:
@@ -283,6 +285,7 @@ def main():
 
         if args.reload:
             for (file) in import_files:
+                print(f"FILE RELOAD: {file}")
                 watchdog_service(import_file, process_dashboard(file))
 
         sys.exit(0)
