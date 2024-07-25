@@ -238,7 +238,7 @@ def main():
         import_file = args.dashboard_file
         import_files = []
         
-        if import_file.isdir():
+        if os.path.isdir(import_file):
             import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))]       
 
         elif not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
@@ -246,7 +246,7 @@ def main():
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
 
-        if import_file.isFIle():        
+        if os.path.isfile(import_file):        
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
 
