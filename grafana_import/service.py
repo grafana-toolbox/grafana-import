@@ -1,13 +1,18 @@
 import logging
+import sys
 import time
 import typing as t
 from pathlib import Path
 
+
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-logger = logging.getLogger(__name__)
+def setup_logging(level=logging.INFO, verbose: bool = False):
+    log_format = "%(asctime)-15s [%(name)-26s] %(levelname)-8s: %(message)s"
+    logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
 
+logger = logging.getLogger(__name__)
 
 class SingleFileModifiedHandler(PatternMatchingEventHandler):
 
