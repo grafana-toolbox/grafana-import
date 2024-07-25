@@ -237,6 +237,9 @@ def main():
         import_path = ""
         import_file = args.dashboard_file
         import_files = []
+        print(f"FILE in DASHBOARD: {file}")
+        isDir = os.path.isdir(import_file)
+        print(f"IS DIR: {isDir}")
         
         if os.path.isdir(import_file):
             import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))]       
