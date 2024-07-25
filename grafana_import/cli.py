@@ -249,8 +249,11 @@ def main():
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
 
         if os.path.isfile(import_file):        
+            print(f"IS FILE: {import_file}")
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
+            print(f"FILE in FILES: {import_files[0]}")
+
 
 
         def process_dashboard(file):
