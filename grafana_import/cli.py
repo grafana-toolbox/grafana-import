@@ -285,7 +285,7 @@ def main():
         for (file) in import_files:
             try:
                 process_dashboard(file)
-            except Exception:
+            except Exception as e:
                 logger.error(f"Failed to process file {file}. Reason: {str(e)}")
                 continue
                 # sys.exit(1)
