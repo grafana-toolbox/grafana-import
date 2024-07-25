@@ -240,19 +240,22 @@ def main():
         isDir = os.path.isdir(import_file)
         print(f"IS DIR: {isDir}")
         
-        if os.path.isdir(import_file):
-            import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))]       
+              
 
-        elif not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
+        if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
+            import_files.append(import_file)    
 
         if os.path.isfile(import_file):        
             print(f"IS FILE: {import_file}")
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
             print(f"FILE in FILES: {import_files[0]}")
+
+        if os.path.isdir(import_file):
+            import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))] 
 
 
 
