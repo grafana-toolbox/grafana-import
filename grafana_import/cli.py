@@ -284,10 +284,10 @@ def main():
                 raise IOError(msg)
 
         for (file) in import_files:
-            try:
-                process_dashboard(file)
-            except Exception:
-                sys.exit(1)
+           # try:
+            process_dashboard(file)
+           # except Exception:
+           #     sys.exit(1)
 
         if args.reload:
             for (file) in import_files:
