@@ -112,8 +112,8 @@ class Grafana:
             print("Grafana Health check Start")
             res = self.grafana_api.health.check()
             print(f"Grafana Health check result: {res}")
-            # if res["database"] != "ok":
-            #     raise Exception("grafana is not UP")
+            if res["database"] != "ok":
+                raise Exception("grafana is not UP")
         except:
             raise
 
