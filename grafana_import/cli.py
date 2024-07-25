@@ -236,12 +236,13 @@ def main():
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
+        print(f"BASE_PATH: {base_path}")
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
         import_file = os.path.join(import_path, import_file)
-
+        print(f"IMPORT_FILE: {import_file}")
         def process_dashboard():
             try:
                 dash = read_dashboard_file(import_file)
