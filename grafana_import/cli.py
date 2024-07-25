@@ -260,7 +260,7 @@ def main():
 
         if os.path.isdir(import_file):
             import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))] 
-
+            print(f"FILESSSS: {import_files[0]}")
 
 
         def process_dashboard(file):
