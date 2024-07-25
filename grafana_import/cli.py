@@ -237,19 +237,23 @@ def main():
         import_path = ""
         import_file = args.dashboard_file
         import_files = []
+
         isDir = os.path.isdir(import_file)
+        isFile = os.path.isfile(import_file)
         print(f"IS DIR: {isDir}")
+        print(f"IS FILE: {isFile}")
         
               
 
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
+            print(f"NOT: {import_file}")
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
             import_files.append(import_file)    
 
         if os.path.isfile(import_file):        
-            print(f"IS FILE: {import_file}")
+            print(f"IT IS FILE: {import_file}")
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
             print(f"FILE in FILES: {import_files[0]}")
