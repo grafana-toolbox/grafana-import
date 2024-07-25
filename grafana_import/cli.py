@@ -236,18 +236,26 @@ def main():
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
-        print(f"BASE_PATH: {base_path}")
-        if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
+        import_files = []
+        
+        if import_file.isdir():
+            import_files = [f for f in os.listdir(import_file) if os.path.isfile(os.path.join(import_file, f))]       
+
+        elif not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
-        import_file = os.path.join(import_path, import_file)
-        print(f"IMPORT_FILE: {import_file}")
-        def process_dashboard():
+
+        if import_file.isFIle():        
+            import_file = os.path.join(import_path, import_file)
+            import_files.append(import_file)
+
+
+        def process_dashboard(file):
             try:
-                dash = read_dashboard_file(import_file)
+                dash = read_dashboard_file(file)
             except Exception as ex:
-                msg = f"Failed to load dashboard from: {import_file}. Reason: {ex}"
+                msg = f"Failed to load dashboard from: {file}. Reason: {ex}"
                 logger.exception(msg)
                 raise IOError(msg) from ex
 
@@ -267,13 +275,15 @@ def main():
                 logger.error(msg)
                 raise IOError(msg)
 
-        try:
-            process_dashboard()
-        except Exception:
-            sys.exit(1)
+        for (file) in import_files:
+            try:
+                process_dashboard(file)
+            except Exception:
+                sys.exit(1)
 
         if args.reload:
-            watchdog_service(import_file, process_dashboard)
+            for (file) in import_files:
+                watchdog_service(import_file, process_dashboard(file))
 
         sys.exit(0)
 
