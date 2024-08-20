@@ -222,7 +222,7 @@ grafana-import import --overwrite -i /path/to/gl-dashboard.py
 ```shell
 usage: grafana-import [-h] [-a] [-b BASE_PATH] [-c CONFIG_FILE]
                       [-d DASHBOARD_NAME] [-g GRAFANA_LABEL]
-                      [-f GRAFANA_FOLDER] [-i DASHBOARD_FILE] [-o] [-p] [-v]
+                      [-f GRAFANA_FOLDER] [-i DASHBOARD_FILE] [-o] [-p] [-v] [-k]
                       [-V]
                       [ACTION]
 
@@ -259,6 +259,7 @@ optional arguments:
                         the folder name where to import into Grafana.
   -i DASHBOARD_FILE, --dashboard_file DASHBOARD_FILE
                         path to the dashboard file to import into Grafana.
+  -k  --keep_uid        keep uid defined in dashboard file to import into Grafana.
   -o, --overwrite       if a dashboard with same name exists in folder,
                         overwrite it with this new one.
   -r, --reload          Watch the input dashboard for changes on disk, and
