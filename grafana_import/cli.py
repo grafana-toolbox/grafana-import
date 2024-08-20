@@ -169,7 +169,7 @@ def main():
              "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
     )
 
-    parser.keep_uid(
+    parser.add_argument(
         "-k",
         "--keep_uid",
         action="store_true",
