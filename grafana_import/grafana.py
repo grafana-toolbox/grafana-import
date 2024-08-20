@@ -330,7 +330,7 @@ class Grafana:
                         )
         else:
             # force the creation of a new dashboard
-            new_dash["dashboard"]["uid"] = None
+            #new_dash["dashboard"]["uid"] = None
             new_dash["dashboard"]["id"] = None
             new_dash["overwrite"] = False
 
