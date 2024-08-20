@@ -111,6 +111,9 @@ class Grafana:
         # * allow to create new dashboard with same name in specified folder.
         self.allow_new = kwargs.get("allow_new", False)
 
+          # * when importing dash, keep dashboard uid defined in the json file.
+        self.keep_uid = kwargs.get("keep_uid", False)
+
         # * try to connect to the API
         try:
             res = self.grafana_api.health.check()
@@ -329,8 +332,10 @@ class Grafana:
                             "Use `overwrite` to permit overwriting it."
                         )
         else:
-            # force the creation of a new dashboard
-            #new_dash["dashboard"]["uid"] = None
+            if not self.keep_uid:
+                # force the creation of a new dashboard
+                new_dash["dashboard"]["uid"] = None
+
             new_dash["dashboard"]["id"] = None
             new_dash["overwrite"] = False
 

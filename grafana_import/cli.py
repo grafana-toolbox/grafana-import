@@ -74,6 +74,7 @@ class myArgs:
         "overwrite",
         "allow_new",
         "verbose",
+        "keep_uid",
     ]
 
     def __init__(self):
@@ -167,6 +168,15 @@ def main():
              "import: import a local dashboard file (previously exported) to Grafana.\n"
              "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
     )
+
+    parser.keep_uid(
+        "-k",
+        "--keep_uid",
+        action="store_true",
+        default=False,
+        help="when importing dashboard, keep dashboard uid defined in the json file.",
+    )
+
     inArgs = myArgs()
     args = parser.parse_args(namespace=inArgs)
 
@@ -216,11 +226,15 @@ def main():
     if "export_suffix" not in config["general"] or config["general"]["export_suffix"] is None:
         config["general"]["export_suffix"] = "_%Y%m%d%H%M%S"
 
+    if args.keep_uid is None:
+        args.keep_uid = False
+
     params = grafana_settings(url=args.grafana_url, config=config, label=args.grafana_label)
     params.update(
         {
             "overwrite": args.overwrite,
             "allow_new": args.allow_new,
+            "keep_uid": args.keep_uid,
         }
     )
 
