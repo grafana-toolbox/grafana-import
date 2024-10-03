@@ -3,6 +3,8 @@
 # History
 
 ## Unreleased
+
+## 0.3.0 (2024-10-03)
 * Permit invocation without configuration file for ad hoc operations.
   In this mode, the Grafana URL can optionally be defined using the
   environment variable `GRAFANA_URL`.
