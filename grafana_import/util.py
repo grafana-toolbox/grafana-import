@@ -46,7 +46,7 @@ def grafana_settings(
     Acquire Grafana connection profile settings, and application settings.
     """
 
-    params: SettingsType
+    params: SettingsType = {}
 
     # Grafana connectivity.
     if url or "GRAFANA_URL" in os.environ:
