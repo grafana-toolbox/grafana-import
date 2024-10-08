@@ -45,7 +45,7 @@ def test_import_dashboard_success(mocked_grafana, mocked_responses, tmp_path, ca
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
-def test_export_dashboard_success(mocked_grafana, mocked_responses, capsys, use_settings):
+def test_export_dashboard_success(mocked_grafana, mocked_responses, caplog, use_settings):
     """
     Verify "export dashboard" works.
     """
@@ -66,12 +66,11 @@ def test_export_dashboard_success(mocked_grafana, mocked_responses, capsys, use_
         m.stop()
     assert ex.match("0")
 
-    out, err = capsys.readouterr()
-    assert re.match(r"OK: Dashboard 'foobar' exported to: ./foobar_\d+.json", out)
+    assert re.match(r".*OK: Dashboard 'foobar' exported to: ./foobar_\d+.json.*", caplog.text, re.DOTALL)
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
-def test_export_dashboard_notfound(mocked_grafana, mocked_responses, capsys, use_settings):
+def test_export_dashboard_notfound(mocked_grafana, mocked_responses, caplog, use_settings):
     """
     Verify "export dashboard" fails appropriately when addressed dashboard does not exist.
     """
@@ -88,12 +87,11 @@ def test_export_dashboard_notfound(mocked_grafana, mocked_responses, capsys, use
         main()
     assert ex.match("1")
 
-    out, err = capsys.readouterr()
-    assert "Dashboard name not found: foobar" in out
+    assert "Dashboard name not found: foobar" in caplog.text
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
-def test_remove_dashboard_success(mocked_grafana, mocked_responses, capsys, use_settings):
+def test_remove_dashboard_success(mocked_grafana, mocked_responses, caplog, use_settings):
     """
     Verify "remove dashboard" works.
     """
@@ -110,5 +108,4 @@ def test_remove_dashboard_success(mocked_grafana, mocked_responses, capsys, use_
         main()
     assert ex.match("0")
 
-    out, err = capsys.readouterr()
-    assert "OK: Dashboard removed: foobar" in out
+    assert "OK: Dashboard removed: foobar" in caplog.text

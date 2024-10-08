@@ -46,7 +46,7 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
     try:
         output = open(output_file, "w")
     except OSError as e:
-        print("File {0} error: {1}.".format(output_file, e.strerror))
+        logger.error("File {0} error: {1}.".format(output_file, e.strerror))
         sys.exit(2)
 
     content = None
@@ -56,7 +56,7 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
         content = json.dumps(dashboard["dashboard"])
     output.write(content)
     output.close()
-    print(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
+    logger.info(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
 
 
 class myArgs:
@@ -212,7 +212,7 @@ def main():
     if args.action == "exporter" and (
         "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
-        print("ERROR: no dashboard has been specified.")
+        logger.error("ERROR: no dashboard has been specified.")
         sys.exit(1)
 
     config["check_folder"] = False
@@ -238,29 +238,46 @@ def main():
     try:
         grafana_api = Grafana.Grafana(**params)
     except Exception as e:
-        print(f"ERROR: {e}")
+        logger.error(f"ERROR: {e}")
         sys.exit(1)
 
     # Import
     if args.action == "import":
         if args.dashboard_file is None:
-            print("ERROR: no file to import provided!")
+            logger.error("ERROR: no file to import provided!")
             sys.exit(1)
 
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
+        import_files = []
+
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
-            if "imports_path" in config["general"]:
-                import_path = os.path.join(import_path, config["general"]["imports_path"])
-        import_file = os.path.join(import_path, import_file)
+            if "import_path" in config["general"]:
+                import_path = os.path.join(import_path, config["general"]["import_path"])
+            import_file = os.path.join(import_path, import_file)
+            import_files.append(import_file)
+        else:
+            if os.path.isfile(import_file):
+                logger.info(f"The path is a file: '{import_file}'")
+                import_file = os.path.join(import_path, import_file)
+                import_files.append(import_file)
 
-        def process_dashboard():
+            if os.path.isdir(import_file):
+                logger.info(f"The path is a directory: '{import_file}'")
+                import_files = [
+                    os.path.join(import_file, f)
+                    for f in os.listdir(import_file)
+                    if os.path.isfile(os.path.join(import_file, f))
+                ]
+                logger.info(f"Found the following files: '{import_files}' in dir '{import_file}'")
+
+        def process_dashboard(file_path):
             try:
-                dash = read_dashboard_file(import_file)
+                dash = read_dashboard_file(file_path)
             except Exception as ex:
-                msg = f"Failed to load dashboard from: {import_file}. Reason: {ex}"
+                msg = f"Failed to load dashboard from: {file_path}. Reason: {ex}"
                 logger.exception(msg)
                 raise IOError(msg) from ex
 
@@ -280,13 +297,17 @@ def main():
                 logger.error(msg)
                 raise IOError(msg)
 
-        try:
-            process_dashboard()
-        except Exception:
-            sys.exit(1)
+        for file in import_files:
+            print(f"Processing file: {file}")
+            try:
+                process_dashboard(file)
+            except Exception as e:
+                logger.error(f"Failed to process file {file}. Reason: {str(e)}")
+                continue
 
         if args.reload:
-            watchdog_service(import_file, process_dashboard)
+            for file in import_files:
+                watchdog_service(import_file, process_dashboard(file))
 
         sys.exit(0)
 
@@ -295,19 +316,19 @@ def main():
         dashboard_name = config["general"]["dashboard_name"]
         try:
             grafana_api.remove_dashboard(dashboard_name)
-            print(f"OK: Dashboard removed: {dashboard_name}")
+            logger.info(f"OK: Dashboard removed: {dashboard_name}")
             sys.exit(0)
         except Grafana.GrafanaDashboardNotFoundError as exp:
-            print(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
+            logger.info(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
             sys.exit(1)
         except Grafana.GrafanaFolderNotFoundError as exp:
-            print(f"KO: Folder not found: {exp.folder}")
+            logger.info(f"KO: Folder not found: {exp.folder}")
             sys.exit(1)
         except GrafanaApi.GrafanaBadInputError as exp:
-            print(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
+            logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
             sys.exit(1)
         except Exception:
-            print("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            logger.info("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
     # Export
@@ -316,10 +337,10 @@ def main():
         try:
             dash = grafana_api.export_dashboard(dashboard_name)
         except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
-            print("KO: Dashboard name not found: {0}".format(dashboard_name))
+            logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
             sys.exit(1)
         except Exception:
-            print("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
         if dash is not None:
