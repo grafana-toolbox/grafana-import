@@ -22,11 +22,13 @@ _Export and import Grafana dashboards using the [Grafana HTTP API] and
 ## Installation
 
 ```shell
-pip install --upgrade 'grafana-import[builder]'
+pip install --upgrade 'grafana-import[builder] @ git+https://github.com/grafana-toolbox/grafana-import.git'
 ```
 
-The command outlined above describes a full installation of `grafana-import`,
-including support for dashboard builders, aka. dashboard-as-code.
+Currently, there is no up-to-date version on PyPI, so we recommend to
+install directly from the repository. The command outlined above describes
+a full installation of `grafana-import`, including support for dashboard
+builders, aka. dashboard-as-code.
 
 
 ## Ad Hoc Usage
@@ -220,7 +222,7 @@ grafana-import import --overwrite -i /path/to/gl-dashboard.py
 ```shell
 usage: grafana-import [-h] [-a] [-b BASE_PATH] [-c CONFIG_FILE]
                       [-d DASHBOARD_NAME] [-g GRAFANA_LABEL]
-                      [-f GRAFANA_FOLDER] [-i DASHBOARD_FILE] [-o] [-p] [-v]
+                      [-f GRAFANA_FOLDER] [-i DASHBOARD_FILE] [-o] [-p] [-v] [-k]
                       [-V]
                       [ACTION]
 
@@ -257,6 +259,7 @@ optional arguments:
                         the folder name where to import into Grafana.
   -i DASHBOARD_FILE, --dashboard_file DASHBOARD_FILE
                         path to the dashboard file to import into Grafana.
+  -k  --keep_uid        keep uid defined in dashboard file to import into Grafana. When dashboard is overriden, the uid is also overriden.
   -o, --overwrite       if a dashboard with same name exists in folder,
                         overwrite it with this new one.
   -r, --reload          Watch the input dashboard for changes on disk, and
