@@ -74,6 +74,12 @@ Watch the input dashboard for changes on disk, and re-upload it, when changed.
 grafana-import import --overwrite --reload -i gd-prometheus.py
 ```
 
+### Import dashboards from a directory
+Import all dashboards from provided directory
+```shell
+grafana-import import -i "./dashboards_folder"
+```
+
 ### Export
 Export the dashboard titled `my-first-dashboard` to the default export directory.
 ```bash
@@ -198,19 +204,19 @@ jb install github.com/grafana/grafonnet/gen/grafonnet-latest@main
 #### Usage
 Render dashboard defined in [Grafonnet]/[Jsonnet].
 ```shell
-grafana-import import --overwrite -i /path/to/faro.jsonnet
+grafana-import import --overwrite -i ./path/to/faro.jsonnet
 ```
 
 ### grafana-dashboard
 Render dashboard defined using [grafana-dashboard].
 ```shell
-grafana-import import --overwrite -i /path/to/gd-dashboard.py
+grafana-import import --overwrite -i ./path/to/gd-dashboard.py
 ```
 
 ### grafanalib
 Render dashboard defined using [grafanalib].
 ```shell
-grafana-import import --overwrite -i /path/to/gl-dashboard.py
+grafana-import import --overwrite -i ./path/to/gl-dashboard.py
 ```
 
 
