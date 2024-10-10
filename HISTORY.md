@@ -3,6 +3,10 @@
 # History
 
 ## Unreleased
+- Fixed folder argument issue
+- Fixed import dashboards into a folder
+
+Thanks, @vrymar.
 
 ## 0.3.0 (2024-10-03)
 * Permit invocation without configuration file for ad hoc operations.
