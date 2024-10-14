@@ -27,12 +27,8 @@ from grafana_import.util import grafana_settings, load_yaml_config, read_dashboa
 config = None
 
 
-def setup_logging(level=logging.INFO, verbose: bool = False):
-    log_format = "%(asctime)-15s [%(name)-26s] %(levelname)-8s: %(message)s"
-    logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
-
-
 def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
+
     output_file = base_path
     file_name = dashboard_name
 
@@ -50,7 +46,7 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
     try:
         output = open(output_file, "w")
     except OSError as e:
-        logger.error("File {0} error: {1}.".format(output_file, e.strerror))
+        print("File {0} error: {1}.".format(output_file, e.strerror))
         sys.exit(2)
 
     content = None
@@ -60,7 +56,7 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
         content = json.dumps(dashboard["dashboard"])
     output.write(content)
     output.close()
-    logger.info(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
+    print(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
 
 
 class myArgs:
@@ -74,7 +70,6 @@ class myArgs:
         "overwrite",
         "allow_new",
         "verbose",
-        "keep_uid",
     ]
 
     def __init__(self):
@@ -95,6 +90,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+
     setup_logging()
 
     # Get command line arguments.
@@ -106,7 +102,7 @@ def main():
         action="store_true",
         default=False,
         help="If a dashboard with same name exists in an another folder, "
-             "allow to create a new dashboard with same name it that folder.",
+        "allow to create a new dashboard with same name it that folder.",
     )
 
     parser.add_argument("-b", "--base_path", help="set base directory to find default files.")
@@ -164,19 +160,10 @@ def main():
         choices=["import", "export", "remove"],
         default="import",
         help="action to perform. Is one of 'export', 'import' (default), or 'remove'.\n"
-             "export: lookup for dashboard name in Grafana and dump it to local file.\n"
-             "import: import a local dashboard file (previously exported) to Grafana.\n"
-             "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
+        "export: lookup for dashboard name in Grafana and dump it to local file.\n"
+        "import: import a local dashboard file (previously exported) to Grafana.\n"
+        "remove: lookup for dashboard name in Grafana and remove it from Grafana server.",
     )
-
-    parser.add_argument(
-        "-k",
-        "--keep_uid",
-        action="store_true",
-        default=False,
-        help="when importing dashboard, keep dashboard uid defined in the json file.",
-    )
-
     inArgs = myArgs()
     args = parser.parse_args(namespace=inArgs)
 
@@ -213,9 +200,9 @@ def main():
         config["general"]["dashboard_name"] = args.dashboard_name
 
     if args.action == "exporter" and (
-            "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
+        "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
-        logger.error("ERROR: no dashboard has been specified.")
+        print("ERROR: no dashboard has been specified.")
         sys.exit(1)
 
     config["check_folder"] = False
@@ -226,57 +213,40 @@ def main():
     if "export_suffix" not in config["general"] or config["general"]["export_suffix"] is None:
         config["general"]["export_suffix"] = "_%Y%m%d%H%M%S"
 
-    if args.keep_uid is None:
-        args.keep_uid = False
-
     params = grafana_settings(url=args.grafana_url, config=config, label=args.grafana_label)
     params.update(
         {
             "overwrite": args.overwrite,
             "allow_new": args.allow_new,
-            "keep_uid": args.keep_uid,
         }
     )
 
     try:
         grafana_api = Grafana.Grafana(**params)
     except Exception as e:
-        logger.error(f"ERROR: {e}")
+        print(f"ERROR: {e}")
         sys.exit(1)
 
     # Import
     if args.action == "import":
         if args.dashboard_file is None:
-            logger.error("ERROR: no file to import provided!")
+            print("ERROR: no file to import provided!")
             sys.exit(1)
 
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
-        import_files = []
-
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "imports_path" in config["general"]:
                 import_path = os.path.join(import_path, config["general"]["imports_path"])
-            import_files.append(import_file)
+        import_file = os.path.join(import_path, import_file)
 
-        if os.path.isfile(import_file):
-            logger.info(f"The path is a file: '{import_file}'")
-            import_file = os.path.join(import_path, import_file)
-            import_files.append(import_file)
-
-        if os.path.isdir(import_file):
-            logger.info(f"The path is a directory: '{import_file}'")
-            import_files = [os.path.join(import_file, f) for f in os.listdir(import_file) if
-                            os.path.isfile(os.path.join(import_file, f))]
-            logger.info(f"Found the following files: '{import_files}' in dir '{import_file}'")
-
-        def process_dashboard(file_path):
+        def process_dashboard():
             try:
-                dash = read_dashboard_file(file_path)
+                dash = read_dashboard_file(import_file)
             except Exception as ex:
-                msg = f"Failed to load dashboard from: {file_path}. Reason: {ex}"
+                msg = f"Failed to load dashboard from: {import_file}. Reason: {ex}"
                 logger.exception(msg)
                 raise IOError(msg) from ex
 
@@ -296,17 +266,13 @@ def main():
                 logger.error(msg)
                 raise IOError(msg)
 
-        for (file) in import_files:
-            try:
-                process_dashboard(file)
-            except Exception as e:
-                logger.error(f"Failed to process file {file}. Reason: {str(e)}")
-                continue
-                # sys.exit(1)
+        try:
+            process_dashboard()
+        except Exception:
+            sys.exit(1)
 
         if args.reload:
-            for (file) in import_files:
-                watchdog_service(import_file, process_dashboard(file))
+            watchdog_service(import_file, process_dashboard)
 
         sys.exit(0)
 
@@ -315,19 +281,19 @@ def main():
         dashboard_name = config["general"]["dashboard_name"]
         try:
             grafana_api.remove_dashboard(dashboard_name)
-            logger.info(f"OK: Dashboard removed: {dashboard_name}")
+            print(f"OK: Dashboard removed: {dashboard_name}")
             sys.exit(0)
         except Grafana.GrafanaDashboardNotFoundError as exp:
-            logger.info(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
+            print(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
             sys.exit(1)
         except Grafana.GrafanaFolderNotFoundError as exp:
-            logger.info(f"KO: Folder not found: {exp.folder}")
+            print(f"KO: Folder not found: {exp.folder}")
             sys.exit(1)
         except GrafanaApi.GrafanaBadInputError as exp:
-            logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
+            print(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            print("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
     # Export
@@ -336,10 +302,10 @@ def main():
         try:
             dash = grafana_api.export_dashboard(dashboard_name)
         except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
-            logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
+            print("KO: Dashboard name not found: {0}".format(dashboard_name))
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            print("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
         if dash is not None:

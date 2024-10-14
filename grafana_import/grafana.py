@@ -1,22 +1,14 @@
 import os
 import re
-import sys
 import traceback
 import typing as t
 import unicodedata
-import logging
 
 import grafana_client.api as GrafanaApi
 import grafana_client.client as GrafanaClient
 
 from grafana_import.constants import PKG_NAME
 
-def setup_logging(level=logging.INFO, verbose: bool = False):
-    log_format = "%(asctime)-15s [%(name)-26s] %(levelname)-8s: %(message)s"
-    logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
-
-
-logger = logging.getLogger(__name__)
 
 class GrafanaDashboardNotFoundError(Exception):
     """
@@ -68,10 +60,10 @@ def remove_accents_and_space(input_str: str) -> str:
 class Grafana:
     # * to store the folders list, dashboards list (kind of cache)
     folders: t.List[t.Any] = []
-    dashboards: t.List[t.Any] = []      
-    
+    dashboards: t.List[t.Any] = []
 
     def __init__(self, **kwargs):
+
         # Configure Grafana connectivity.
         if "url" in kwargs:
             self.grafana_api = GrafanaApi.GrafanaApi.from_url(
@@ -107,14 +99,9 @@ class Grafana:
         # * allow to create new dashboard with same name in specified folder.
         self.allow_new = kwargs.get("allow_new", False)
 
-          # * when importing dash, keep dashboard uid defined in the json file.
-        self.keep_uid = kwargs.get("keep_uid", False)
-
         # * try to connect to the API
         try:
             res = self.grafana_api.health.check()
-            logger.info(f"Grafana Health check result: {res}")
-            
             if res["database"] != "ok":
                 raise Exception("grafana is not UP")
         except:
@@ -257,7 +244,8 @@ class Grafana:
 
         return folder
 
-    def import_dashboard(self, dashboard: t.Dict[str, t.Any]) -> bool:        
+    def import_dashboard(self, dashboard: t.Dict[str, t.Any]) -> bool:
+
         # ** build a temporary meta dashboard struct to store info
         # ** by default dashboard will be overwritten
         new_dash: t.Dict[str, t.Any] = {
@@ -278,7 +266,6 @@ class Grafana:
         else:
             # ** check 'custom' folder existence (custom != General)
             folder = self.get_folder(self.grafana_folder)
-
             if folder is None:
                 folder = self.grafana_api.folder.create_folder(self.grafana_folder)
 
@@ -328,10 +315,8 @@ class Grafana:
                             "Use `overwrite` to permit overwriting it."
                         )
         else:
-            if not self.keep_uid:
-                # force the creation of a new dashboard
-                new_dash["dashboard"]["uid"] = None
-
+            # force the creation of a new dashboard
+            new_dash["dashboard"]["uid"] = None
             new_dash["dashboard"]["id"] = None
             new_dash["overwrite"] = False
 

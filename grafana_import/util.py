@@ -17,7 +17,6 @@ def setup_logging(level=logging.INFO, verbose: bool = False):
     log_format = "%(asctime)-15s [%(name)-26s] %(levelname)-8s: %(message)s"
     logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
 
-logger = logging.getLogger(__name__)
 
 def load_yaml_config(config_file: str) -> ConfigType:
     """
