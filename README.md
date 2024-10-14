@@ -22,13 +22,11 @@ _Export and import Grafana dashboards using the [Grafana HTTP API] and
 ## Installation
 
 ```shell
-pip install --upgrade 'grafana-import[builder] @ git+https://github.com/grafana-toolbox/grafana-import.git'
+pip install --upgrade 'grafana-import[builder]'
 ```
 
-Currently, there is no up-to-date version on PyPI, so we recommend to
-install directly from the repository. The command outlined above describes
-a full installation of `grafana-import`, including support for dashboard
-builders, aka. dashboard-as-code.
+The command outlined above describes a full installation of `grafana-import`,
+including support for dashboard builders, aka. dashboard-as-code.
 
 
 ## Ad Hoc Usage

@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import traceback
@@ -73,13 +74,8 @@ class Grafana:
     def __init__(self, **kwargs):
         # Configure Grafana connectivity.
         if "url" in kwargs:
-           # self.grafana_api = GrafanaApi.GrafanaApi.from_url(kwargs["url"])
-            self.grafana_api = GrafanaApi.GrafanaApi(
-                auth=kwargs.get("token", None),
-                host=kwargs.get("url", "localhost"),
-                protocol=kwargs.get("protocol", "https"),
-                port=kwargs.get("port", None),
-                verify=kwargs.get("verify_ssl", True),
+            self.grafana_api = GrafanaApi.GrafanaApi.from_url(
+                url=kwargs["url"], credential=os.environ.get("GRAFANA_TOKEN")
             )
         else:
             config = {}
