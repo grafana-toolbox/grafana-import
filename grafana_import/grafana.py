@@ -308,9 +308,11 @@ class Grafana:
                     )
             # ** case d) send a copy to existing dash : update existing
             elif new_dash["folderId"] == old_dash["folderId"]:
-                if ("uid" not in new_dash["dashboard"]
-                        or new_dash["dashboard"]["uid"] != old_dash["uid"]
-                        or new_dash["dashboard"]["id"] != old_dash["id"]):
+                if (
+                    "uid" not in new_dash["dashboard"]
+                    or new_dash["dashboard"]["uid"] != old_dash["uid"]
+                    or new_dash["dashboard"]["id"] != old_dash["id"]
+                ):
                     if self.overwrite:
                         if not self.keep_uid:
                             new_dash["dashboard"]["uid"] = old_dash["uid"]
