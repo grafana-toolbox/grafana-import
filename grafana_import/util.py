@@ -47,23 +47,25 @@ def grafana_settings(
     Acquire Grafana connection profile settings, and application settings.
     """
 
-    params: SettingsType
+    params: SettingsType = {}
 
     # Grafana connectivity.
     if url or "GRAFANA_URL" in os.environ:
-        params = {"url": url or os.environ["GRAFANA_URL"]}
-        if "GRAFANA_TOKEN" in os.environ:
-            params.update({"token": os.environ["GRAFANA_TOKEN"]})
-    elif config is not None:
+        params.update({"url": url or os.environ["GRAFANA_URL"]})
+    if "GRAFANA_TOKEN" in os.environ:
+        params.update({"token": os.environ["GRAFANA_TOKEN"]})
+
+    if not params and config is not None and label is not None:
         params = grafana_settings_from_config_section(config=config, label=label)
 
     # Additional application parameters.
-    params.update(
-        {
-            "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
-            "folder": config.get("general", {}).get("grafana_folder", "General"),
-        }
-    )
+    if config is not None:
+        params.update(
+            {
+                "search_api_limit": config.get("grafana", {}).get("search_api_limit", 5000),
+                "folder": config.get("general", {}).get("grafana_folder", "General"),
+            }
+        )
     return params
 
 

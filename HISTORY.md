@@ -3,6 +3,12 @@
 # History
 
 ## Unreleased
+- Fixed folder argument issue
+- Fixed import dashboards into a folder
+
+Thanks, @vrymar.
+
+## 0.3.0 (2024-10-03)
 * Permit invocation without configuration file for ad hoc operations.
   In this mode, the Grafana URL can optionally be defined using the
   environment variable `GRAFANA_URL`.
@@ -14,6 +20,8 @@
   JSON.
 * Add watchdog feature, monitoring the input dashboard for changes on
   disk, and re-uploading it, when changed.
+* Pass `GRAFANA_TOKEN` environment variable on Grafana initialization.
+  Thanks, @jl2397.
 
 ## 0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client
