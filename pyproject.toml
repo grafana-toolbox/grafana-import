@@ -5,50 +5,48 @@ line-length = 120
 line-length = 120
 
 lint.select = [
-  # Bandit
-  "S",
-  # Bugbear
-  "B",
   # Builtins
   "A",
+  # Bugbear
+  "B",
   # comprehensions
   "C4",
+  # Pycodestyle
+  "E",
   # eradicate
   "ERA",
-  # flake8-2020
-  "YTT",
+  # Pyflakes
+  "F",
   # isort
   "I",
   # pandas-vet
   "PD",
-  # print
-  "T20",
-  # Pycodestyle
-  "E",
-  "W",
-  # Pyflakes
-  "F",
   # return
   "RET",
+  # Bandit
+  "S",
+  # print
+  "T20",
+  "W",
+  # flake8-2020
+  "YTT",
 ]
 
 lint.extend-ignore = [
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-  # Use of `assert` detected
-  "S101",
-]
-"grafana_import/cli.py" = [
+lint.per-file-ignores."grafana_import/cli.py" = [
   # `print` found
   "T201",
 ]
 
-
 # ===================
 # Tasks configuration
 # ===================
+lint.per-file-ignores."tests/*" = [
+  # Use of `assert` detected
+  "S101",
+]
 
 [tool.pytest.ini_options]
 addopts = "-rA --verbosity=3 --cov --cov-report=term-missing --cov-report=xml"
@@ -69,14 +67,14 @@ branch = false
 omit = [
   "tests/*",
 ]
-source = ["grafana_import"]
+source = [ "grafana_import" ]
 
 [tool.coverage.report]
 fail_under = 0
 show_missing = true
 
 [tool.mypy]
-packages = ["grafana_import"]
+packages = [ "grafana_import" ]
 install_types = true
 ignore_missing_imports = true
 implicit_optional = true
