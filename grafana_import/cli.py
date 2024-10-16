@@ -212,7 +212,7 @@ def main():
         config["general"]["dashboard_name"] = args.dashboard_name
 
     if args.action == "exporter" and (
-            "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
+        "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
         logger.error("ERROR: no dashboard has been specified.")
