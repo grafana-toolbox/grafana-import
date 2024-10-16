@@ -1,5 +1,13 @@
 # Grafana import Tool
 
+[![Tests](https://github.com/grafana-toolbox/grafana-import/actions/workflows/tests.yml/badge.svg)](https://github.com/grafana-toolbox/grafana-import/actions/workflows/tests.yml)
+[![Coverage](https://codecov.io/gh/grafana-toolbox/grafana-import/branch/main/graph/badge.svg)](https://app.codecov.io/gh/grafana-toolbox/grafana-import)
+[![PyPI Version](https://img.shields.io/pypi/v/grafana-import.svg)](https://pypi.org/project/grafana-import/)
+[![Python Version](https://img.shields.io/pypi/pyversions/grafana-import.svg)](https://pypi.org/project/grafana-import/)
+[![PyPI Downloads](https://pepy.tech/badge/grafana-import/month)](https://pepy.tech/project/grafana-import/)
+[![Status](https://img.shields.io/pypi/status/grafana-import.svg)](https://pypi.org/project/grafana-import/)
+[![License](https://img.shields.io/pypi/l/grafana-import.svg)](https://pypi.org/project/grafana-import/)
+
 _Export and import Grafana dashboards using the [Grafana HTTP API] and
 [grafana-client]._
 
