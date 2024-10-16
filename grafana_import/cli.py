@@ -210,7 +210,7 @@ def main():
         config["general"]["dashboard_name"] = args.dashboard_name
 
     if args.action == "exporter" and (
-            "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
+        "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
         sys.exit(1)
@@ -255,7 +255,7 @@ def main():
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
             import_path = base_path
             if "import_path" in config["general"]:
-                import_path = os.path.join(import_path, config["general"]["import_path"])            
+                import_path = os.path.join(import_path, config["general"]["import_path"])
             import_file = os.path.join(import_path, import_file)
             import_files.append(import_file)
         else:
@@ -266,8 +266,11 @@ def main():
 
             if os.path.isdir(import_file):
                 logger.info(f"The path is a directory: '{import_file}'")
-                import_files = [os.path.join(import_file, f) for f in os.listdir(import_file) if
-                                os.path.isfile(os.path.join(import_file, f))]
+                import_files = [
+                    os.path.join(import_file, f)
+                    for f in os.listdir(import_file)
+                    if os.path.isfile(os.path.join(import_file, f))
+                ]
                 logger.info(f"Found the following files: '{import_files}' in dir '{import_file}'")
 
         def process_dashboard(file_path):
@@ -293,8 +296,8 @@ def main():
                 msg = f"Failed to import dashboard into Grafana. title={title}, folder={folder_name}"
                 logger.error(msg)
                 raise IOError(msg)
-            
-        for (file) in import_files:
+
+        for file in import_files:
             print(f"Processing file: {file}")
             try:
                 process_dashboard(file)
@@ -303,8 +306,8 @@ def main():
                 continue
 
         if args.reload:
-            for (file) in import_files:
-                watchdog_service(import_file, process_dashboard(file))    
+            for file in import_files:
+                watchdog_service(import_file, process_dashboard(file))
 
         sys.exit(0)
 
