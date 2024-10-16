@@ -6,6 +6,7 @@
 - Fixed folder argument issue
 - Fixed import dashboards into a folder
 - Added keep-uid argument to preserve the dashboard uid provided in file
+- Added an option to import dashboards from a directory
 
 Thanks, @vrymar.
 
