@@ -25,6 +25,10 @@ extras = {
         "ruff<0.5; python_version>='3.7'",
         "validate-pyproject<0.17",
     ],
+    "release": [
+        "build",
+        "twine",
+    ],
     "test": [
         "grafana-dashboard<0.2; python_version>='3.7'",
         "importlib-resources<7; python_version<'3.9'",
