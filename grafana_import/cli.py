@@ -215,7 +215,6 @@ def main():
         "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
-        logger.error("ERROR: no dashboard has been specified.")
         sys.exit(1)
 
     config["check_folder"] = False
@@ -242,21 +241,17 @@ def main():
         grafana_api = Grafana.Grafana(**params)
     except Exception as e:
         logger.error(f"ERROR: {e}")
-        logger.error(f"ERROR: {e}")
         sys.exit(1)
 
     # Import
     if args.action == "import":
         if args.dashboard_file is None:
             logger.error("ERROR: no file to import provided!")
-            logger.error("ERROR: no file to import provided!")
             sys.exit(1)
 
         # Compute effective input file path.
         import_path = ""
         import_file = args.dashboard_file
-        import_files = []
-
         import_files = []
 
         if not re.search(r"^(?:(?:/)|(?:\.?\./))", import_file):
@@ -283,9 +278,7 @@ def main():
         def process_dashboard(file_path):
             try:
                 dash = read_dashboard_file(file_path)
-                dash = read_dashboard_file(file_path)
             except Exception as ex:
-                msg = f"Failed to load dashboard from: {file_path}. Reason: {ex}"
                 msg = f"Failed to load dashboard from: {file_path}. Reason: {ex}"
                 logger.exception(msg)
                 raise IOError(msg) from ex
@@ -326,22 +319,17 @@ def main():
         try:
             grafana_api.remove_dashboard(dashboard_name)
             logger.info(f"OK: Dashboard removed: {dashboard_name}")
-            logger.info(f"OK: Dashboard removed: {dashboard_name}")
             sys.exit(0)
         except Grafana.GrafanaDashboardNotFoundError as exp:
-            logger.info(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
             logger.info(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
             sys.exit(1)
         except Grafana.GrafanaFolderNotFoundError as exp:
             logger.info(f"KO: Folder not found: {exp.folder}")
-            logger.info(f"KO: Folder not found: {exp.folder}")
             sys.exit(1)
         except GrafanaApi.GrafanaBadInputError as exp:
             logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
-            logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
             logger.info("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
@@ -352,10 +340,8 @@ def main():
             dash = grafana_api.export_dashboard(dashboard_name)
         except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
             logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
-            logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
             logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
             sys.exit(1)
 
