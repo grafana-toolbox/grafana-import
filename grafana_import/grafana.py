@@ -75,9 +75,6 @@ class Grafana:
             config["host"] = kwargs.get("host", "localhost")
             config["port"] = kwargs.get("port", 3000)
             config["token"] = kwargs.get("token", None)
-            if config["token"] is None:
-                raise GrafanaClient.GrafanaBadInputError("Grafana authentication token missing")
-
             config["verify_ssl"] = kwargs.get("verify_ssl", True)
 
             self.grafana_api = GrafanaApi.GrafanaApi(
