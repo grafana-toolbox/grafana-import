@@ -19,6 +19,17 @@ def get_settings_arg(use_settings: bool = True):
     return "--grafana_url http://localhost:3000"
 
 
+def test_no_action_failure(caplog):
+    """
+    Verify the program fails when invoked without positional `action` argument.
+    """
+    sys.argv = ["grafana-import"]
+    with pytest.raises(SystemExit) as ex:
+        main()
+    assert ex.match("1")
+    assert "Unknown action: None. Use one of: ['import', 'export', 'remove']" in caplog.messages
+
+
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
 def test_import_dashboard_success(mocked_grafana, mocked_responses, tmp_path, caplog, use_settings):
     """

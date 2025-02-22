@@ -24,6 +24,14 @@ jobs:
         python-version: ["3.6", "3.13"]
       fail-fast: false
 
+    services:
+      grafana:
+        image: grafana/grafana:latest
+        ports:
+          - 3000:3000
+        env:
+          GF_SECURITY_ADMIN_PASSWORD: admin
+
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
