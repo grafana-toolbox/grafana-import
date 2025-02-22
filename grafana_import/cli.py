@@ -117,7 +117,6 @@ def main():
         "-g",
         "--grafana_label",
         help="label in the config file that represents the grafana to connect to.",
-        default="default",
     )
 
     parser.add_argument("-f", "--grafana_folder", help="the folder name where to import into Grafana.")
@@ -159,7 +158,6 @@ def main():
         metavar="ACTION",
         nargs="?",
         choices=["import", "export", "remove"],
-        default="import",
         help="action to perform. Is one of 'export', 'import' (default), or 'remove'.\n"
         "export: lookup for dashboard name in Grafana and dump it to local file.\n"
         "import: import a local dashboard file (previously exported) to Grafana.\n"
@@ -332,7 +330,7 @@ def main():
             sys.exit(1)
 
     # Export
-    else:
+    elif args.action == "export":
         dashboard_name = config["general"]["dashboard_name"]
         try:
             dash = grafana_api.export_dashboard(dashboard_name)
@@ -346,6 +344,10 @@ def main():
         if dash is not None:
             save_dashboard(config, args, base_path, dashboard_name, dash, "exported")
             sys.exit(0)
+
+    else:
+        logger.error(f"Unknown action: {args.action}. Use one of: {parser._actions[-2].choices}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
