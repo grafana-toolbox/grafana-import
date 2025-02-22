@@ -67,7 +67,7 @@ class Grafana:
         # Configure Grafana connectivity.
         if "url" in kwargs:
             self.grafana_api = GrafanaApi.GrafanaApi.from_url(
-                url=kwargs["url"], credential=os.environ.get("GRAFANA_TOKEN")
+                url=kwargs["url"], credential=kwargs.get("credential", os.environ.get("GRAFANA_TOKEN"))
             )
         else:
             config = {}
