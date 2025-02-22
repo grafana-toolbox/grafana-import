@@ -97,6 +97,10 @@ def main():
     # Get command line arguments.
     parser = argparse.ArgumentParser(description="play with grafana dashboards json files.")
 
+    def print_help_and_exit():
+        parser.print_help(sys.stderr)
+        parser.exit(1)
+
     parser.add_argument(
         "-a",
         "--allow_new",
@@ -235,8 +239,8 @@ def main():
 
     try:
         grafana_api = Grafana.Grafana(**params)
-    except Exception as e:
-        logger.error(f"ERROR: {e}")
+    except Exception as ex:
+        logger.error(str(ex))
         sys.exit(1)
 
     # Import
@@ -347,7 +351,7 @@ def main():
 
     else:
         logger.error(f"Unknown action: {args.action}. Use one of: {parser._actions[-2].choices}")
-        sys.exit(1)
+        print_help_and_exit()
 
 
 if __name__ == "__main__":

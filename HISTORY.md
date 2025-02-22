@@ -8,6 +8,7 @@
 - Added basic example program about how to import a dashboard
 - Options: Permitted usage without authentication credentials or token
 - Options: Do not assume defaults for `ACTION` and `--grafana_label` args
+- Options: Print help text when using erroneous parameters
 
 ## 0.4.0 (2024-10-16)
 - Fixed folder argument issue
