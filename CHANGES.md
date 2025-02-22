@@ -1,6 +1,4 @@
-.. :changelog:
-
-# History
+# Changelog
 
 ## Unreleased
 - Improved Python API authentication when using URL-based connectivity,
@@ -10,7 +8,7 @@
 - Options: Do not assume defaults for `ACTION` and `--grafana_label` args
 - Options: Print help text when using erroneous parameters
 
-## 0.4.0 (2024-10-16)
+## v0.4.0 (2024-10-16)
 - Fixed folder argument issue
 - Fixed import dashboards into a folder
 - Added keep-uid argument to preserve the dashboard uid provided in file
@@ -18,7 +16,7 @@
 
 Thanks, @vrymar.
 
-## 0.3.0 (2024-10-03)
+## v0.3.0 (2024-10-03)
 * Permit invocation without configuration file for ad hoc operations.
   In this mode, the Grafana URL can optionally be defined using the
   environment variable `GRAFANA_URL`.
@@ -33,18 +31,18 @@ Thanks, @vrymar.
 * Pass `GRAFANA_TOKEN` environment variable on Grafana initialization.
   Thanks, @jl2397.
 
-## 0.2.0 (2022-02-05)
+## v0.2.0 (2022-02-05)
 * Migrated from grafana_api to grafana_client
   
-## 0.1.0 (2022-02-01)
+## v0.1.0 (2022-02-01)
 * Fixed behavior for dashboard moved from one folder to another
 
-## 0.0.3 (2022-02-31)
+## v0.0.3 (2022-02-31)
 * Added "remove dashboard" feature
 
-## 0.0.2 (2022-01-07)
+## v0.0.2 (2022-01-07)
 * Changed config file format from json to yml
 * Added labels in config to define multi grafana servers.
 
-## 0.0.1 (2021-03-15)
-* First release on github.
+## v0.0.1 (2021-03-15)
+* First release on GitHub.
