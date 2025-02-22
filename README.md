@@ -36,6 +36,23 @@ pip install --upgrade 'grafana-import[builder]'
 The command outlined above describes a full installation of `grafana-import`,
 including support for dashboard builders, aka. dashboard-as-code.
 
+## Synopsis
+
+### Command-line use
+```shell
+grafana-import import -u http://admin:admin@localhost:3000 -i grafana_dashboard.json --overwrite
+```
+
+### API use
+```python
+import json
+from pathlib import Path
+from grafana_import.grafana import Grafana
+
+dashboard = json.loads(Path("grafana_dashboard.json").read_text())
+gio = Grafana(url="http://localhost:3000", credential=("admin", "admin"))
+outcome = gio.import_dashboard(dashboard)
+```
 
 ## Ad Hoc Usage
 
