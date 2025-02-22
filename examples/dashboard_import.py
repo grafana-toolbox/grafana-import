@@ -16,7 +16,7 @@ Upload a Grafana dashboard file in JSON format to the Grafana server.
 
 3. Visit Grafana
 
-   http://admin:admin@localhost:3000/
+   http://localhost:3000/
    Log in using admin:admin.
 """
 
