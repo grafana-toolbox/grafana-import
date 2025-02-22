@@ -3,6 +3,8 @@
 # History
 
 ## Unreleased
+- Improved Python API authentication when using URL-based connectivity,
+  by respecting the `credential` keyword argument
 
 ## 0.4.0 (2024-10-16)
 - Fixed folder argument issue
