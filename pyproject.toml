@@ -36,8 +36,11 @@ lint.extend-ignore = [
 ]
 
 lint.per-file-ignores."grafana_import/cli.py" = [
-  # `print` found
-  "T201",
+  "T201",  # `print` found
+]
+
+lint.per-file-ignores."examples/*" = [
+  "T201",  # `print` found
 ]
 
 # ===================
