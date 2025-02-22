@@ -106,7 +106,7 @@ lint = [
 
 release = [
   { cmd = "python -m build" },
-  { cmd = "twine upload dist/*" },
+  { cmd = "twine upload --skip-existing dist/*" },
 ]
 
 test = { cmd = "pytest" }
