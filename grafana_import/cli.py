@@ -53,6 +53,8 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
         file_name = dashboard["meta"]["folderTitle"] + "_" + file_name
 
     file_name = Grafana.remove_accents_and_space(file_name)
+    # Sanitize filename to prevent path traversal attacks
+    file_name = file_name.replace("/", "_").replace("\\", "_").replace("..", "")
     output_file = os.path.join(output_file, file_name + ".json")
 
     # Create directory structure if it doesn't exist
