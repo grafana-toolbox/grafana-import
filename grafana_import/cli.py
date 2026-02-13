@@ -22,7 +22,12 @@ import grafana_client.client as GrafanaApi
 import grafana_import.grafana as Grafana
 from grafana_import.constants import CONFIG_NAME, PKG_NAME, PKG_VERSION
 from grafana_import.service import watchdog_service
-from grafana_import.util import grafana_settings, load_yaml_config, read_dashboard_file, setup_logging
+from grafana_import.util import (
+    grafana_settings,
+    load_yaml_config,
+    read_dashboard_file,
+    setup_logging,
+)
 
 config = None
 
@@ -32,17 +37,29 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
     output_file = base_path
     file_name = dashboard_name
 
-    if "exports_path" in config["general"] and not re.search(r"^(\.|\/)?/", config["general"]["exports_path"]):
+    if "exports_path" in config["general"] and not re.search(
+        r"^(\.|\/)?/", config["general"]["exports_path"]
+    ):
         output_file = os.path.join(output_file, config["general"]["exports_path"])
 
     if "export_suffix" in config["general"]:
         file_name += datetime.today().strftime(config["general"]["export_suffix"])
 
-    if "meta" in dashboard and "folderId" in dashboard["meta"] and dashboard["meta"]["folderId"] != 0:
+    if (
+        "meta" in dashboard
+        and "folderId" in dashboard["meta"]
+        and dashboard["meta"]["folderId"] != 0
+    ):
         file_name = dashboard["meta"]["folderTitle"] + "_" + file_name
 
     file_name = Grafana.remove_accents_and_space(file_name)
     output_file = os.path.join(output_file, file_name + ".json")
+
+    # Create directory structure if it doesn't exist
+    output_dir = os.path.dirname(output_file)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
     try:
         output = open(output_file, "w")
     except OSError as e:
@@ -95,7 +112,9 @@ def main():
     setup_logging()
 
     # Get command line arguments.
-    parser = argparse.ArgumentParser(description="play with grafana dashboards json files.")
+    parser = argparse.ArgumentParser(
+        description="play with grafana dashboards json files."
+    )
 
     def print_help_and_exit():
         parser.print_help(sys.stderr)
@@ -110,12 +129,16 @@ def main():
         "allow to create a new dashboard with same name it that folder.",
     )
 
-    parser.add_argument("-b", "--base_path", help="set base directory to find default files.")
+    parser.add_argument(
+        "-b", "--base_path", help="set base directory to find default files."
+    )
     parser.add_argument("-c", "--config_file", help="path to config files.")
 
     parser.add_argument("-d", "--dashboard_name", help="name of dashboard to export.")
 
-    parser.add_argument("-u", "--grafana_url", help="Grafana URL to connect to.", required=False)
+    parser.add_argument(
+        "-u", "--grafana_url", help="Grafana URL to connect to.", required=False
+    )
 
     parser.add_argument(
         "-g",
@@ -123,9 +146,15 @@ def main():
         help="label in the config file that represents the grafana to connect to.",
     )
 
-    parser.add_argument("-f", "--grafana_folder", help="the folder name where to import into Grafana.")
+    parser.add_argument(
+        "-f", "--grafana_folder", help="the folder name where to import into Grafana."
+    )
 
-    parser.add_argument("-i", "--dashboard_file", help="path to the dashboard file to import into Grafana.")
+    parser.add_argument(
+        "-i",
+        "--dashboard_file",
+        help="path to the dashboard file to import into Grafana.",
+    )
 
     parser.add_argument(
         "-o",
@@ -144,10 +173,18 @@ def main():
     )
 
     parser.add_argument(
-        "-p", "--pretty", action="store_true", help="use JSON indentation when exporting or extraction of dashboards."
+        "-p",
+        "--pretty",
+        action="store_true",
+        help="use JSON indentation when exporting or extraction of dashboards.",
     )
 
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode; display log message to stdout.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="verbose mode; display log message to stdout.",
+    )
 
     parser.add_argument(
         "-V",
@@ -212,7 +249,8 @@ def main():
         config["general"]["dashboard_name"] = args.dashboard_name
 
     if args.action == "exporter" and (
-        "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
+        "dashboard_name" not in config["general"]
+        or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
         sys.exit(1)
@@ -222,13 +260,18 @@ def main():
         config["general"]["grafana_folder"] = args.grafana_folder
         config["check_folder"] = True
 
-    if "export_suffix" not in config["general"] or config["general"]["export_suffix"] is None:
+    if (
+        "export_suffix" not in config["general"]
+        or config["general"]["export_suffix"] is None
+    ):
         config["general"]["export_suffix"] = "_%Y%m%d%H%M%S"
 
     if args.keep_uid is None:
         args.keep_uid = False
 
-    params = grafana_settings(url=args.grafana_url, config=config, label=args.grafana_label)
+    params = grafana_settings(
+        url=args.grafana_url, config=config, label=args.grafana_label
+    )
     params.update(
         {
             "overwrite": args.overwrite,
@@ -273,7 +316,9 @@ def main():
                     for f in os.listdir(import_file)
                     if os.path.isfile(os.path.join(import_file, f))
                 ]
-                logger.info(f"Found the following files: '{import_files}' in dir '{import_file}'")
+                logger.info(
+                    f"Found the following files: '{import_files}' in dir '{import_file}'"
+                )
 
         def process_dashboard(file_path):
             try:
@@ -321,7 +366,9 @@ def main():
             logger.info(f"OK: Dashboard removed: {dashboard_name}")
             sys.exit(0)
         except Grafana.GrafanaDashboardNotFoundError as exp:
-            logger.info(f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}")
+            logger.info(
+                f"KO: Dashboard not found in folder '{exp.folder}': {exp.dashboard}"
+            )
             sys.exit(1)
         except Grafana.GrafanaFolderNotFoundError as exp:
             logger.info(f"KO: Folder not found: {exp.folder}")
@@ -330,7 +377,11 @@ def main():
             logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' remove exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            logger.info(
+                "ERROR: Dashboard '{0}' remove exception '{1}'".format(
+                    dashboard_name, traceback.format_exc()
+                )
+            )
             sys.exit(1)
 
     # Export
@@ -338,11 +389,18 @@ def main():
         dashboard_name = config["general"]["dashboard_name"]
         try:
             dash = grafana_api.export_dashboard(dashboard_name)
-        except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
+        except (
+            Grafana.GrafanaFolderNotFoundError,
+            Grafana.GrafanaDashboardNotFoundError,
+        ):
             logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
             sys.exit(1)
         except Exception:
-            logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
+            logger.info(
+                "ERROR: Dashboard '{0}' export exception '{1}'".format(
+                    dashboard_name, traceback.format_exc()
+                )
+            )
             sys.exit(1)
 
         if dash is not None:
@@ -350,7 +408,9 @@ def main():
             sys.exit(0)
 
     else:
-        logger.error(f"Unknown action: {args.action}. Use one of: {parser._actions[-2].choices}")
+        logger.error(
+            f"Unknown action: {args.action}. Use one of: {parser._actions[-2].choices}"
+        )
         print_help_and_exit()
 
 
