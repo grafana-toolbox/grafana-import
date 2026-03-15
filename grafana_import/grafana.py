@@ -1,6 +1,5 @@
 import os
 import re
-import traceback
 import typing as t
 import unicodedata
 
@@ -67,7 +66,8 @@ class Grafana:
         # Configure Grafana connectivity.
         if "url" in kwargs:
             self.grafana_api = GrafanaApi.GrafanaApi.from_url(
-                url=kwargs["url"], credential=kwargs.get("credential", os.environ.get("GRAFANA_TOKEN"))
+                url=kwargs["url"],
+                credential=kwargs.get("credential", os.environ.get("GRAFANA_TOKEN")),
             )
         else:
             config = {}
@@ -116,10 +116,7 @@ class Grafana:
         # Init cache for dashboards.
         if len(Grafana.dashboards) == 0:
             # Collect all dashboard names.
-            try:
-                res = self.grafana_api.search.search_dashboards(type_="dash-db", limit=self.search_api_limit)
-            except Exception as ex:
-                raise Exception("error: {}".format(traceback.format_exc())) from ex
+            res = self.grafana_api.search.search_dashboards(type_="dash-db", limit=self.search_api_limit)
             Grafana.dashboards = res
 
         dashboards = Grafana.dashboards
@@ -168,7 +165,9 @@ class Grafana:
         except Exception as ex:
             if isinstance(ex, GrafanaClient.GrafanaClientError) and ex.status_code == 404:
                 raise GrafanaDashboardNotFoundError(
-                    dashboard_name, self.grafana_folder, f"Dashboard not found: {dashboard_name}"
+                    dashboard_name,
+                    self.grafana_folder,
+                    f"Dashboard not found: {dashboard_name}",
                 ) from ex
             raise
 
