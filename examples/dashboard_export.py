@@ -27,6 +27,10 @@ from grafana_import.grafana import Grafana
 
 def main():
 
+    if len(sys.argv) < 3:
+        print(f"Usage: python {sys.argv[0]} <dashboard_name> <output_path>")
+        sys.exit(1)
+
     # Read positional CLI arguments.
     dashboard_name = sys.argv[1]
     output_path = Path(sys.argv[2])
@@ -38,6 +42,7 @@ def main():
     dashboard = gio.export_dashboard(dashboard_name)
 
     # Persist only the dashboard payload, just like Grafana import expects.
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(dashboard["dashboard"], indent=2, sort_keys=True))
 
     print(f"Grafana dashboard exported successfully to {output_path}")
