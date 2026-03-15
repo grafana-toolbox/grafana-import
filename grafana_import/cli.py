@@ -232,7 +232,7 @@ def main():
     if args.dashboard_name is not None:
         config["general"]["dashboard_name"] = args.dashboard_name
 
-    if args.action == "exporter" and (
+    if args.action == "export" and (
         "dashboard_name" not in config["general"] or config["general"]["dashboard_name"] is None
     ):
         logger.error("ERROR: no dashboard has been specified.")
@@ -347,6 +347,9 @@ def main():
         except Grafana.GrafanaFolderNotFoundError as exp:
             logger.info(f"KO: Folder not found: {exp.folder}")
             sys.exit(1)
+        except GrafanaApi.GrafanaUnauthorizedError:
+            logger.error("KO: Unauthorized - check your Grafana credentials or token.")
+            sys.exit(1)
         except GrafanaApi.GrafanaBadInputError as exp:
             logger.info(f"KO: Removing dashboard failed: {dashboard_name}. Reason: {exp}")
             sys.exit(1)
@@ -364,6 +367,9 @@ def main():
             Grafana.GrafanaDashboardNotFoundError,
         ):
             logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
+            sys.exit(1)
+        except GrafanaApi.GrafanaUnauthorizedError:
+            logger.error("KO: Unauthorized - check your Grafana credentials or token.")
             sys.exit(1)
         except Exception:
             logger.info("ERROR: Dashboard '{0}' export exception '{1}'".format(dashboard_name, traceback.format_exc()))
