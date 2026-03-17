@@ -247,7 +247,7 @@ def main():
     if args.dashboard_name is not None:
         config["general"]["dashboard_name"] = args.dashboard_name
 
-    if args.action == "exporter" and (
+    if args.action == "export" and (
         "dashboard_name" not in config["general"]
         or config["general"]["dashboard_name"] is None
     ):
