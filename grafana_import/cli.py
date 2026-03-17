@@ -52,15 +52,14 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
     file_name = file_name.replace("/", "_").replace("\\", "_").replace("..", "")
     output_file = Path(output_file) / (file_name + ".json")
 
-    # Create directory structure if it doesn't exist
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-
     content = (
         json.dumps(dashboard["dashboard"], sort_keys=True, indent=2)
         if args.pretty
         else json.dumps(dashboard["dashboard"])
     )
     try:
+        # Create directory structure if it doesn't exist
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w") as output:
             output.write(content)
     except OSError as e:
