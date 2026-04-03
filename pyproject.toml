@@ -3,7 +3,6 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
-
 lint.select = [
   # Builtins
   "A",
@@ -31,18 +30,13 @@ lint.select = [
   # flake8-2020
   "YTT",
 ]
-
-lint.extend-ignore = [
-]
-
-lint.per-file-ignores."grafana_import/cli.py" = [
-  "T201",  # `print` found
-]
-
+lint.extend-ignore = []
 lint.per-file-ignores."examples/*" = [
-  "T201",  # `print` found
+  "T201", # `print` found
 ]
-
+lint.per-file-ignores."grafana_import/cli.py" = [
+  "T201", # `print` found
+]
 # ===================
 # Tasks configuration
 # ===================
@@ -51,30 +45,27 @@ lint.per-file-ignores."tests/*" = [
   "S101",
 ]
 
-[tool.pytest.ini_options]
-addopts = "-rA --verbosity=3 --cov --cov-report=term-missing --cov-report=xml"
-minversion = "2.0"
-log_level = "DEBUG"
-log_cli_level = "DEBUG"
-log_format = "%(asctime)-15s [%(name)-24s] %(levelname)-8s: %(message)s"
-testpaths = [
+[tool.pytest]
+ini_options.addopts = "-rA --verbosity=3 --cov --cov-report=term-missing --cov-report=xml"
+ini_options.minversion = "2.0"
+ini_options.log_level = "DEBUG"
+ini_options.log_cli_level = "DEBUG"
+ini_options.log_format = "%(asctime)-15s [%(name)-24s] %(levelname)-8s: %(message)s"
+ini_options.testpaths = [
   "grafana_import",
   "tests",
 ]
-xfail_strict = true
-markers = [
-]
+ini_options.xfail_strict = true
+ini_options.markers = []
 
-[tool.coverage.run]
-branch = false
-omit = [
+[tool.coverage]
+run.branch = false
+run.omit = [
   "tests/*",
 ]
-source = [ "grafana_import" ]
-
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
+run.source = [ "grafana_import" ]
+report.fail_under = 0
+report.show_missing = true
 
 [tool.mypy]
 packages = [ "grafana_import" ]
@@ -83,30 +74,25 @@ ignore_missing_imports = true
 implicit_optional = true
 non_interactive = true
 
-[tool.poe.tasks]
-
-check = [
+[tool.poe]
+tasks.check = [
   "lint",
   "test",
 ]
-
-format = [
+tasks.format = [
   { cmd = "black ." },
   # Configure Ruff not to auto-fix (remove!) unused variables (F841) and `print` statements (T201).
   { cmd = "ruff check --fix --ignore=ERA --ignore=F401 --ignore=F841 --ignore=T20 ." },
   { cmd = "pyproject-fmt --keep-full-version pyproject.toml" },
 ]
-
-lint = [
+tasks.lint = [
   { cmd = "ruff check ." },
   { cmd = "black --check ." },
   { cmd = "validate-pyproject pyproject.toml" },
   { cmd = "mypy grafana_import" },
 ]
-
-release = [
+tasks.release = [
   { cmd = "python -m build" },
   { cmd = "twine upload --skip-existing dist/*" },
 ]
-
-test = { cmd = "pytest" }
+tasks.test = { cmd = "pytest" }

@@ -1,6 +1,5 @@
 import os
 import re
-import traceback
 import typing as t
 import unicodedata
 
@@ -67,7 +66,8 @@ class Grafana:
         # Configure Grafana connectivity.
         if "url" in kwargs:
             self.grafana_api = GrafanaApi.GrafanaApi.from_url(
-                url=kwargs["url"], credential=kwargs.get("credential", os.environ.get("GRAFANA_TOKEN"))
+                url=kwargs["url"],
+                credential=kwargs.get("credential", os.environ.get("GRAFANA_TOKEN")),
             )
         else:
             config = {}
@@ -116,10 +116,9 @@ class Grafana:
         # Init cache for dashboards.
         if len(Grafana.dashboards) == 0:
             # Collect all dashboard names.
-            try:
-                res = self.grafana_api.search.search_dashboards(type_="dash-db", limit=self.search_api_limit)
-            except Exception as ex:
-                raise Exception("error: {}".format(traceback.format_exc())) from ex
+            res = self.grafana_api.search.search_dashboards(
+                type_="dash-db", limit=self.search_api_limit
+            )
             Grafana.dashboards = res
 
         dashboards = Grafana.dashboards
@@ -140,9 +139,10 @@ class Grafana:
                 # set current dashbard as found candidate
                 board = cur_dash
                 # check the folder part
-                if ("folderTitle" in cur_dash and cur_dash["folderTitle"] == folder["title"]) or (
-                    "folderTitle" not in cur_dash and folder["id"] == 0
-                ):
+                if (
+                    "folderTitle" in cur_dash
+                    and cur_dash["folderTitle"] == folder["title"]
+                ) or ("folderTitle" not in cur_dash and folder["id"] == 0):
                     # this is a requested folder or no folder !
                     break
 
@@ -161,14 +161,18 @@ class Grafana:
             board = self.find_dashboard(dashboard_name)
 
             if board is None:
-                raise GrafanaClient.GrafanaClientError(response=None, message="Not Found", status_code=404)
+                raise GrafanaClient.GrafanaClientError(
+                    response=None, message="Not Found", status_code=404
+                )
 
             # Fetch the dashboard JSON representation by UID.
             return self.grafana_api.dashboard.get_dashboard(board["uid"])
         except Exception as ex:
             if isinstance(ex, GrafanaClient.GrafanaClientError) and ex.status_code == 404:
                 raise GrafanaDashboardNotFoundError(
-                    dashboard_name, self.grafana_folder, f"Dashboard not found: {dashboard_name}"
+                    dashboard_name,
+                    self.grafana_folder,
+                    f"Dashboard not found: {dashboard_name}",
                 ) from ex
             raise
 
@@ -201,11 +205,15 @@ class Grafana:
         board = self.find_dashboard(dashboard_name)
 
         if board is None:
-            raise GrafanaDashboardNotFoundError(dashboard_name, folder["title"], "dashboard not found")
+            raise GrafanaDashboardNotFoundError(
+                dashboard_name, folder["title"], "dashboard not found"
+            )
 
-        if (folder["id"] == 0 and "folderId" in board and board["folderId"] != folder["id"]) or (
-            folder["id"] != 0 and "folderId" not in board
-        ):
+        if (
+            folder["id"] == 0
+            and "folderId" in board
+            and board["folderId"] != folder["id"]
+        ) or (folder["id"] != 0 and "folderId" not in board):
             raise GrafanaApi.GrafanaBadInputError(
                 "Dashboard name found but in folder '{0}'!".format(board["folderTitle"])
             )
@@ -272,7 +280,11 @@ class Grafana:
                 if folder:
                     new_dash["folderId"] = folder["id"]
                 else:
-                    raise Exception("KO: grafana folder '{0}' creation failed.".format(self.grafana_folder))
+                    raise Exception(
+                        "KO: grafana folder '{0}' creation failed.".format(
+                            self.grafana_folder
+                        )
+                    )
             else:
                 new_dash["folderId"] = folder["id"]
 
