@@ -16,13 +16,19 @@ import re
 import sys
 import traceback
 from datetime import datetime
+from pathlib import Path
 
 import grafana_client.client as GrafanaApi
 
 import grafana_import.grafana as Grafana
 from grafana_import.constants import CONFIG_NAME, PKG_NAME, PKG_VERSION
 from grafana_import.service import watchdog_service
-from grafana_import.util import grafana_settings, load_yaml_config, read_dashboard_file, setup_logging
+from grafana_import.util import (
+    grafana_settings,
+    load_yaml_config,
+    read_dashboard_file,
+    setup_logging,
+)
 
 config = None
 
@@ -42,20 +48,23 @@ def save_dashboard(config, args, base_path, dashboard_name, dashboard, action):
         file_name = dashboard["meta"]["folderTitle"] + "_" + file_name
 
     file_name = Grafana.remove_accents_and_space(file_name)
-    output_file = os.path.join(output_file, file_name + ".json")
+    # Sanitize filename to prevent path traversal attacks
+    file_name = file_name.replace("/", "_").replace("\\", "_").replace("..", "")
+    output_file = Path(output_file) / (file_name + ".json")
+
+    content = (
+        json.dumps(dashboard["dashboard"], sort_keys=True, indent=2)
+        if args.pretty
+        else json.dumps(dashboard["dashboard"])
+    )
     try:
-        output = open(output_file, "w")
+        # Create directory structure if it doesn't exist
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, "w") as output:
+            output.write(content)
     except OSError as e:
         logger.error("File {0} error: {1}.".format(output_file, e.strerror))
         sys.exit(2)
-
-    content = None
-    if args.pretty:
-        content = json.dumps(dashboard["dashboard"], sort_keys=True, indent=2)
-    else:
-        content = json.dumps(dashboard["dashboard"])
-    output.write(content)
-    output.close()
     logger.info(f"OK: Dashboard '{dashboard_name}' {action} to: {output_file}")
 
 
@@ -125,7 +134,11 @@ def main():
 
     parser.add_argument("-f", "--grafana_folder", help="the folder name where to import into Grafana.")
 
-    parser.add_argument("-i", "--dashboard_file", help="path to the dashboard file to import into Grafana.")
+    parser.add_argument(
+        "-i",
+        "--dashboard_file",
+        help="path to the dashboard file to import into Grafana.",
+    )
 
     parser.add_argument(
         "-o",
@@ -144,10 +157,18 @@ def main():
     )
 
     parser.add_argument(
-        "-p", "--pretty", action="store_true", help="use JSON indentation when exporting or extraction of dashboards."
+        "-p",
+        "--pretty",
+        action="store_true",
+        help="use JSON indentation when exporting or extraction of dashboards.",
     )
 
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode; display log message to stdout.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="verbose mode; display log message to stdout.",
+    )
 
     parser.add_argument(
         "-V",
@@ -338,7 +359,10 @@ def main():
         dashboard_name = config["general"]["dashboard_name"]
         try:
             dash = grafana_api.export_dashboard(dashboard_name)
-        except (Grafana.GrafanaFolderNotFoundError, Grafana.GrafanaDashboardNotFoundError):
+        except (
+            Grafana.GrafanaFolderNotFoundError,
+            Grafana.GrafanaDashboardNotFoundError,
+        ):
             logger.info("KO: Dashboard name not found: {0}".format(dashboard_name))
             sys.exit(1)
         except Exception:
