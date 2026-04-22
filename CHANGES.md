@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v0.5.1 (2026-04-22)
 - Improved handling of `GrafanaUnauthorizedError` with a clear error message.
   Thanks, @EisenbergD.
 
