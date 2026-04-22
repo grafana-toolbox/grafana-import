@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Improved handling of `GrafanaUnauthorizedError` with a clear error message.
+  Thanks, @EisenbergD.
 
 ## v0.5.0 (2025-02-22)
 - Improved Python API authentication when using URL-based connectivity,
