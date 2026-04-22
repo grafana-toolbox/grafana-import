@@ -77,7 +77,7 @@ def test_export_dashboard_success(mocked_grafana, mocked_responses, caplog, use_
         m.stop()
     assert ex.match("0")
 
-    assert re.match(r".*OK: Dashboard 'foobar' exported to: ./foobar_\d+.json.*", caplog.text, re.DOTALL)
+    assert re.match(r".*OK: Dashboard 'foobar' exported to: foobar_\d+.json.*", caplog.text, re.DOTALL)
 
 
 @pytest.mark.parametrize("use_settings", [True, False], ids=["config-yes", "config-no"])
